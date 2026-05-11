@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Startups 可视化对局</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Startups 可视化对局（Web）</h1>
+      <p>本页面为静态版前端界面，支持多人手动/单人局（P0 人类，P1+ AI）。</p>
+    </header>
+
+    <section class="panel">
+      <h2>开局设置</h2>
+      <label>
+        人数：
+        <input id="players" type="number" min="3" max="7" value="3" />
+      </label>
+      <label>
+        种子（可留空）：
+        <input id="seed" type="number" placeholder="例如 101" />
+      </label>
+      <label>
+        <input id="single-player" type="checkbox" checked />
+        单人局（P0 人类，P1+ AI）
+      </label>
+      <button id="new-game">开始新游戏</button>
+      <button id="seed-random">随机种子</button>
+    </section>
+
+    <section id="game" class="panel" hidden>
+      <h2>当前局面</h2>
+      <div id="state-summary"></div>
+      <h3>市场</h3>
+      <div id="market"></div>
+      <h3>公司反垄断持有人</h3>
+      <div id="monopoly"></div>
+      <h3>当前玩家</h3>
+      <div id="current-player"></div>
+      <h3>可选动作</h3>
+      <div id="actions"></div>
+    </section>
+
+    <section id="results" class="panel" hidden>
+      <h2>结算结果</h2>
+      <div id="scoreboard"></div>
+    </section>
+  </main>
+
+  <script src="ui.js"></script>
+</body>
+</html>

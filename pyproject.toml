@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "startups-core"
+version = "0.1.0"
+description = "Startups 桌游 Python 实现（核心规则引擎）"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+startups = "startups.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
