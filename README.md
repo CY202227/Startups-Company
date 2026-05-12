@@ -1,25 +1,26 @@
-# Startups 桌游 Python 实现（核心规则引擎）
+# Startups Board Game (Python) — Core Rule Engine
 
 ## Language / 语言
 
-中文 | [English](./README.en.md)
+[中文](./README.zh.md) | English (default)
 
-这是一个用 Python 实现的《初创公司》桌游原型。  
-项目按“核心引擎 + 可替换展示层”结构开发，当前实现先覆盖 CLI 与单机 AI 对战，便于后续接入 GUI、API 或更高级 AI。
+This project is a prototype implementation of the board game *Startups* in Python.
+It follows a **core engine + replaceable UI** architecture, currently covering CLI and
+single-player AI modes first, with future extension points for GUI, API, and stronger AI.
 
-## 特性
+## Features
 
-- 不可变状态模型（`dataclass(frozen=True)`）
-- 统一动作入口：`apply_action(state, player_id, action)`
-- 两阶段回合流程（先拿牌，再打牌）
-- 隐藏信息保留到引擎层
-- 反垄断筹码动态归属
-- 结算与边界分支（平局、欠付、负分记录）
-- 支持单人局 AI（随机切换两种策略）
+- Immutable state model (`dataclass(frozen=True)`)
+- Unified action entry: `apply_action(state, player_id, action)`
+- Two-phase turns: `TAKE`, then `PLAY`
+- Hidden information handled in the engine layer
+- Dynamic anti-monopoly token ownership
+- Scoring with edge cases (ties, underpayment, penalty records)
+- Single-player AI with two randomized strategies
 
-## 快速开始
+## Quick Start
 
-### 1) 进入项目并建立运行环境
+### 1) Prepare environment
 
 ```powershell
 cd D:\Dev\Startups-Company
@@ -27,95 +28,223 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2) 安装本地包（可选）
+### 2) Install local package (optional)
 
 ```powershell
 python -m pip install -U pip
 pip install -e .
 ```
 
-安装后可直接使用 `startups` 命令；若不想装脚本，也可直接运行模块文件。
+After installation, use the `startups` command directly.
+If you prefer not to install the console script, run the module directly.
 
-## 运行方式
+## Run Modes
 
-### 2.1 CLI 单机（多玩家）
+### 2.1 CLI Multiplayer (local turns)
 
 ```powershell
 startups --players 3 --seed 101
 ```
 
-### 2.2 CLI 单人局（你 + AI）
+### 2.2 CLI Single Player (You + AI)
 
 ```powershell
 startups --players 3 --seed 101 --single-player
 ```
 
-- `--single-player`：P0 为真人，其余玩家由 AI 控制
-- AI 每一步会在 `greedy` 与 `anti_pressure` 两个策略里随机选择一种
-- AI 决策是基于“可见信息”进行：它只看到自己的手牌，不直接看到他人手牌
+- `--single-player`: P0 is human, P1+ are AI.
+- AI randomly picks between `greedy` and `anti_pressure` each turn.
+- AI uses visible information only: it knows its own hand and public states.
 
-### 2.3 不装脚本也能跑
+### 2.3 Run without installed CLI script
 
 ```powershell
 $env:PYTHONPATH = (Resolve-Path .\src)
 python .\src\startups\main.py --players 3 --seed 101 --single-player
 ```
 
-### 2.4 可视化界面（GitHub Pages）
+### 2.4 Visualization UI (GitHub Pages)
 
-- 打开目录 `docs/` 下新增了一个静态页面，可直接通过 GitHub Pages 托管。
-- 目前支持：
-  - 多人基础交互（默认从 P0 开始）
-  - `3~7` 人
-  - 单人局 AI（P0 人类，P1+ AI）
-  - 回合阶段提示、市场状态、反垄断持有者与结算结果
-- 本地快速预览：
+- A static page is available in `docs/`, including:
+  - Basic multi-player interaction (starts from P0)
+  - `3~7` players
+  - Single-player with AI (P0 human, P1+ AI)
+  - Turn stage, market status, anti-monopoly owner, and score display
+- Local preview:
+
 ```powershell
 cd D:\Dev\Startups-Company
 python -m http.server 8080 --directory docs
 ```
-- 在浏览器打开 `http://localhost:8080` 即可运行。
-- GitHub Pages 发布建议：
-  - 将仓库 Pages Source 设为 `docs/` 目录
-  - 页面地址会变为仓库 `https://<你的用户名>.github.io/<仓库名>/`
 
-## 命令说明（CLI）
+- Open `http://localhost:8080` in your browser.
+- GitHub Pages deployment:
+  - Set Pages Source to `docs/`
+  - Page URL: `https://<your-username>.github.io/<repo-name>/`
 
-- `d` / `draw`：从牌堆拿牌
-- `m <idx>`：从市场拿牌，例如 `m 0`
-- `p <idx>`：打到个人区域，例如 `p 1`
-- `s <idx>`：打到市场，例如 `s 1`
-- `state`：打印当前状态
-- `h`：显示帮助
-- `q`：退出
+## CLI Commands
 
-## 项目结构
+- `d` / `draw`: draw from deck
+- `m <idx>`: take from market, e.g., `m 0`
+- `p <idx>`: place in personal holdings, e.g., `p 1`
+- `s <idx>`: place into market, e.g., `s 1`
+- `state`: print current state
+- `h`: help
+- `q`: quit
 
-- `src/startups/domain.py`：领域对象（`GameState`, `PlayerState`, `CompanyState`, `MarketCard`）
-- `src/startups/rules.py`：动作/阶段枚举、游戏参数与牌组配置
-- `src/startups/engine.py`：状态机与动作执行器
-- `src/startups/actions.py`：命令解析
-- `src/startups/scoring.py`：结算逻辑
-- `src/startups/ai.py`：AI 决策（单人局）
-- `src/startups/cli.py`：命令行交互层
-- `src/startups/main.py`：程序入口
-- `docs/rules_ref.md`：规则映射与实现约束
-- `tests/`：单元测试（阶段、动作、结算、复现性）
+## Project Structure
 
-## 已知限制（当前版本）
+- `src/startups/domain.py`: domain entities (`GameState`, `PlayerState`, `CompanyState`, `MarketCard`)
+- `src/startups/rules.py`: action/stage enums, game constants, card setup
+- `src/startups/engine.py`: state machine and action reducer
+- `src/startups/actions.py`: command parsing
+- `src/startups/scoring.py`: scoring logic
+- `src/startups/ai.py`: AI decision module
+- `src/startups/cli.py`: CLI interactive layer
+- `src/startups/main.py`: program entrypoint
+- `docs/rules_ref_en.md`: rule mapping (default display)
+- `docs/rules_ref.md`: rule mapping (Chinese)
+- `tests/`: unit tests (phase, action, scoring, reproducibility)
 
-- 结算时对不足支付采用了可重放友好的负分记账策略（`penalty`）以保持状态可计算
-- 目前是单回合模型的最小玩法，尚未接入更高级 AI 与多人网络模式
-- 牌面规则与官方边界仍可继续用官方规则补齐（已预留接口）
+## Current Limitations
 
-## 运行测试
+- Underpayment at scoring is tracked using a replay-friendly negative penalty (`penalty`).
+- Current implementation is a minimal one-round model; advanced AI and network multiplayer
+  are not yet integrated.
+- Rule details from the original game can be expanded further while preserving the same structure.
+
+## Run Tests
 
 ```powershell
 pytest
 ```
 
-## 许可证与说明
+## License and notes
 
-- 本项目仅用于实现与学习用途，未内置商业内容/资源文件。
-- 规则文本与牌名来源可见 `docs/rules_ref.md` 与项目计划文件。  
-`docs/rules_ref.md` 采用可执行规则映射，后续可用于回归校验。
+- This project is for learning/implementation purposes.
+- No commercial assets are included.
+- Rule text references and company names are in `docs/rules_ref_en.md` and
+  `docs/rules_ref.md` (Chinese translation), plus the project plan.
+# Startups Board Game (Python) — Core Rule Engine
+
+## Language / 语言
+
+[中文](./README.zh.md) | English
+
+This project is a prototype implementation of the board game *Startups* in Python.
+It follows a **core engine + replaceable UI** architecture, currently covering CLI and
+single-player AI modes first, with future extension points for GUI, API, and stronger AI.
+
+## 特性
+
+- Immutable state model (`dataclass(frozen=True)`)
+- Unified action entry: `apply_action(state, player_id, action)`
+- Two-phase turns: `TAKE`, then `PLAY`
+- Hidden information handled in the engine layer
+- Dynamic anti-monopoly token ownership
+- Scoring with edge cases (ties, underpayment, penalty records)
+- Single-player AI with two randomized strategies
+
+## 快速开始
+
+### 1) Prepare environment
+
+```powershell
+cd D:\Dev\Startups-Company
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 2) Install local package (optional)
+
+```powershell
+python -m pip install -U pip
+pip install -e .
+```
+
+After installation, use the `startups` command directly.  
+If you prefer not to install the console script, run the module directly.
+
+## Run Modes
+
+### 2.1 CLI Multiplayer (local turns)
+
+```powershell
+startups --players 3 --seed 101
+```
+
+### 2.2 CLI Single Player (You + AI)
+
+```powershell
+startups --players 3 --seed 101 --single-player
+```
+
+- `--single-player`: P0 is human, P1+ are AI.
+- AI randomly picks between `greedy` and `anti_pressure` each turn.
+- AI uses visible information only: it knows its own hand and public states.
+
+### 2.3 Run without installed CLI script
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path .\src)
+python .\src\startups\main.py --players 3 --seed 101 --single-player
+```
+
+### 2.4 Visualization UI (GitHub Pages)
+
+ - A static page is available in `docs/`, including:
+  - Basic multi-player interaction (starts from P0)
+  - `3~7` players
+  - Single-player with AI (P0 human, P1+ AI)
+  - Turn stage, market status, anti-monopoly owner, and score display
+- 本地快速预览：
+```powershell
+cd D:\Dev\Startups-Company
+python -m http.server 8080 --directory docs
+```
+- Open `http://localhost:8080` in your browser.
+- GitHub Pages 发布建议：
+  - 将仓库 Pages Source 设为 `docs/` 目录
+  - 页面地址会变为仓库 `https://<你的用户名>.github.io/<仓库名>/`
+
+## CLI Commands
+
+- `d` / `draw`: draw from deck
+- `m <idx>`: take from market, e.g., `m 0`
+- `p <idx>`: place in personal holdings, e.g., `p 1`
+- `s <idx>`: place into market, e.g., `s 1`
+- `state`: print current state
+- `h`: help
+- `q`: quit
+
+## Project Structure
+
+- `src/startups/domain.py`: domain entities (`GameState`, `PlayerState`, `CompanyState`, `MarketCard`)
+- `src/startups/rules.py`: action/stage enums, game constants, card setup
+- `src/startups/engine.py`: state machine and action reducer
+- `src/startups/actions.py`: command parsing
+- `src/startups/scoring.py`: scoring logic
+- `src/startups/ai.py`: AI decision module
+- `src/startups/cli.py`: CLI interactive layer
+- `src/startups/main.py`: program entrypoint
+- `docs/rules_ref_en.md`: rule mapping (default display)
+- `docs/rules_ref.md`: rule mapping (Chinese)
+- `tests/`: unit tests (phase, action, scoring, reproducibility)
+
+## Current Limitations
+
+- Underpayment at scoring is tracked using a replay-friendly negative penalty (`penalty`).
+- Current implementation is a minimal one-round model; advanced AI and network multiplayer are not yet integrated.
+- Rule details from the original game can be expanded further while preserving the same structure.
+
+## Run Tests
+
+```powershell
+pytest
+```
+
+## License and notes
+
+- This project is for learning/implementation purposes.
+- No commercial assets are included.
+- Rule text references and company names are in `docs/rules_ref_en.md` and `docs/rules_ref.md` (Chinese translation), plus the project plan.
