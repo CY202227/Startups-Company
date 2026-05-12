@@ -539,5 +539,4 @@ document.getElementById("seed-random").addEventListener("click", setRandomSeed);
 
 window.onload = () => {
   setRandomSeed();
-  startGame();
 };
