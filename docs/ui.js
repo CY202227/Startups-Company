@@ -51,10 +51,11 @@ const I18N = {
     hand_line: "{idx}）{name}（总量：{total}）",
     cash: "现金：{value}",
     portfolio: "持股：{value}",
+    tie_result: "平局",
     draw_from_deck_btn: "从牌堆抽取（花费 {cost} 金币）",
-    take_market_btn: "拿市场 #{idx}（{name}，+{coins}）",
-    to_portfolio_btn: "{idx} 放入 {name} 资本账户",
-    to_market_btn: "{idx} 放入市场 {name}",
+    take_market_btn: "拿市场 #{idx}（{name}，总量：{total}，+{coins}）",
+    to_portfolio_btn: "放入资本账户",
+    to_market_btn: "放入市场",
     no_hand_skip: "无手牌，回合自动结束。",
     result_prefix: "胜者：P{winner}",
     score_line: "P{idx}：{total}（现金 {cash}，翻牌 {flipped}，罚金 {penalty}）",
@@ -108,10 +109,11 @@ const I18N = {
     hand_line: "{idx}) {name} (Total: {total})",
     cash: "Cash: {value}",
     portfolio: "Portfolio: {value}",
+    tie_result: "Tie",
     draw_from_deck_btn: "Draw from deck (cost {cost})",
-    take_market_btn: "Take market #{idx} ({name}, +{coins})",
-    to_portfolio_btn: "{idx} -> Place to portfolio {name}",
-    to_market_btn: "{idx} -> Put to market {name}",
+    take_market_btn: "Take market #{idx} ({name}, total: {total}, +{coins})",
+    to_portfolio_btn: "To portfolio",
+    to_market_btn: "To market",
     no_hand_skip: "No cards in hand, turn auto-skips.",
     result_prefix: "Winner: P{winner}",
     score_line: "P{idx}: {total} (Cash {cash}, Flipped {flipped}, Penalty {penalty})",
@@ -528,23 +530,6 @@ function aiAction(state) {
   return null;
 }
 
-function deckRemainingByCompany(state) {
-  const table = {};
-  for (const company of COMPANIES) table[company.id] = 0;
-  for (const card of state.deck) {
-    table[card] = (table[card] || 0) + 1;
-  }
-  return table;
-}
-
-function renderHandTotals(state, playerId) {
-  const deckTable = deckRemainingByCompany(state);
-  const player = state.players[playerId];
-  const counts = {};
-  for (const card of player.hand) counts[card] = (counts[card] || 0) + 1;
-  return { counts, deckTable };
-}
-
 function render(state, singlePlayer) {
   const gameSection = document.getElementById("game");
   const summary = document.getElementById("state-summary");
@@ -561,8 +546,8 @@ function render(state, singlePlayer) {
     <div class="row">${t("turn_label", { value: state.turn_number })}</div>
     <div class="row">${t("stage_label", { value: stageText(state.stage) })}</div>
     <div class="row">${t("player_label", {
-      value: `${state.current_player}${state.current_player === 0 ? ` ${t("you_suffix")}` : ""}`,
-    })}</div>
+    value: `${state.current_player}${state.current_player === 0 ? ` ${t("you_suffix")}` : ""}`,
+  })}</div>
     <div class="row">${t("deck_left_label", { value: state.deck.length })}</div>
     <div class="row">${t("event_label", { value: state.events[state.events.length - 1] })}</div>
   `;
@@ -574,11 +559,14 @@ function render(state, singlePlayer) {
     state.market.forEach((card, idx) => {
       const owner = companyOwner(state, card.company_id);
       const blocked = owner === state.current_player;
+      const companyTotal = COMPANIES[card.company_id].total;
       const node = document.createElement("div");
       node.className = `market-card ${blocked ? "blocked" : ""}`;
-      node.textContent = `#${idx} ${companyName(card.company_id)}${currentLocale() === "en" ? ", " : "，"}${
-        currentLocale() === "en" ? `coins ${card.coins}` : `金币:${card.coins}`
-      }${currentLocale() === "en" ? ", " : "，"}`;
+      if (currentLocale() === "en") {
+        node.textContent = `#${idx} ${companyName(card.company_id)}, total: ${companyTotal}, coins: ${card.coins}, `;
+      } else {
+        node.textContent = `#${idx} ${companyName(card.company_id)}（总量：${companyTotal}），金币:${card.coins}，`;
+      }
       const flag = document.createElement("span");
       flag.textContent = blocked ? t("blocked_market_card") : t("market_card");
       flag.className = blocked ? "muted" : "winner";
@@ -599,20 +587,18 @@ function render(state, singlePlayer) {
 
   currentNode.innerHTML = "";
   const player = state.players[state.current_player];
-  const handInfo = renderHandTotals(state, state.current_player);
   const handTitle = document.createElement("div");
   handTitle.className = "row";
   handTitle.innerHTML = `<strong>${t("hand_title")}</strong>`;
   currentNode.appendChild(handTitle);
 
   player.hand.forEach((cardId, idx) => {
-    const total = (handInfo.deckTable[cardId] || 0) + (handInfo.counts[cardId] || 0);
     const line = document.createElement("div");
     line.className = "row";
     line.textContent = t("hand_line", {
       idx,
       name: companyName(cardId),
-      total,
+      total: COMPANIES[cardId].total,
     });
     currentNode.appendChild(line);
   });
@@ -624,6 +610,7 @@ function render(state, singlePlayer) {
   currentNode.innerHTML += `<div class="row">${t("portfolio", { value: portfolioText })}</div>`;
 
   actionNode.innerHTML = "";
+  actionNode.className = "actions-grid";
   if (state.stage === STAGE_TAKE) {
     const cost = marketDrawCost(state, state.current_player);
     const auto = autoTakeAction(state);
@@ -640,6 +627,7 @@ function render(state, singlePlayer) {
         idx: `${idx}`,
         name: companyName(card.company_id),
         coins: card.coins,
+        total: COMPANIES[card.company_id].total,
       });
       btn.disabled = banned;
       btn.onclick = () => onAction({ type: "TAKE_FROM_MARKET", index: idx });
@@ -648,15 +636,23 @@ function render(state, singlePlayer) {
   } else if (state.stage === STAGE_PLAY) {
     if (!player.hand.length) {
       actionNode.innerHTML = `<div class='muted'>${t("no_hand_skip")}</div>`;
+      actionNode.className = "actions-grid";
     }
     player.hand.forEach((cardId, idx) => {
+      const row = document.createElement("div");
+      row.className = "action-row action-card-line";
+      const title = document.createElement("span");
+      title.className = "action-card-title";
+      title.textContent = `${idx}: ${companyName(cardId)}`;
+      row.appendChild(title);
+
       const toPortfolio = document.createElement("button");
       toPortfolio.textContent = t("to_portfolio_btn", {
         idx,
         name: companyName(cardId),
       });
       toPortfolio.onclick = () => onAction({ type: "PLAY_TO_PORTFOLIO", index: idx });
-      actionNode.appendChild(toPortfolio);
+      row.appendChild(toPortfolio);
 
       const toMarket = document.createElement("button");
       const disabled = state.last_took_from_market && state.last_took_company === cardId;
@@ -666,7 +662,8 @@ function render(state, singlePlayer) {
       });
       toMarket.disabled = disabled;
       toMarket.onclick = () => onAction({ type: "PLAY_TO_MARKET", index: idx });
-      actionNode.appendChild(toMarket);
+      row.appendChild(toMarket);
+      actionNode.appendChild(row);
     });
   }
 
@@ -689,7 +686,10 @@ function render(state, singlePlayer) {
     });
     const winnerLine = document.createElement("div");
     winnerLine.className = "row winner";
-    winnerLine.textContent = t("result_prefix", { winner: result.winner });
+    winnerLine.textContent =
+      result.winner === null || result.winner === undefined
+        ? t("tie_result")
+        : t("result_prefix", { winner: result.winner });
     scoreboard.appendChild(winnerLine);
   }
 

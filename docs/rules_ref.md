@@ -54,7 +54,7 @@
   - Bowwow Games: 7
   - Giraffe Beer: 5
   - Elephant Mars Travel: 10
-- 若后续拿到官方完整明细，可在配置层 `COMPANY_CARDS` 直接替换。
+- 若后续需要更换，可在配置层 `COMPANY_CARDS` 直接替换。
 
 ## 五、状态机映射
 
