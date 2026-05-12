@@ -296,6 +296,7 @@ function aiAction(state) {
   const policy = Math.random() < 0.5 ? "greedy" : "anti_pressure";
   if (state.stage === STAGE_TAKE) {
     const legalMarket = canTakeFromMarket(state);
+    if (!legalMarket.length && !state.deck.length) return null;
     const cost = marketDrawCost(state, state.current_player);
     const player = state.players[state.current_player];
     if (policy === "anti_pressure" && legalMarket.length > 0) {
@@ -310,18 +311,30 @@ function aiAction(state) {
     return { type: "TAKE_FROM_DECK" };
   }
   const hand = state.players[state.current_player].hand;
-  const options = hand.map((cardId, idx) => {
+  const marketOptions = [];
+  const portfolioOptions = [];
+  hand.forEach((cardId, idx) => {
     const holder = companyOwner(state, cardId);
-    const score = holder === state.current_player ? 2 : 1;
+    const base = holder === state.current_player ? 2 : 1;
     const antiPressure = holder === null ? 1 : 0;
-    return { idx, cardId, score: score + antiPressure };
+    portfolioOptions.push({ idx, cardId, score: base + antiPressure });
+    if (!(state.last_took_from_market && state.last_took_company === cardId)) {
+      marketOptions.push({ idx, cardId, score: base });
+    }
   });
-  options.sort((a, b) => b.score - a.score);
-  const best = options[0];
-  if (policy === "anti_pressure") {
-    return { type: "PLAY_TO_MARKET", index: best.idx };
+  marketOptions.sort((a, b) => b.score - a.score);
+  portfolioOptions.sort((a, b) => b.score - a.score);
+
+  if (policy === "anti_pressure" && marketOptions.length > 0) {
+    return { type: "PLAY_TO_MARKET", index: marketOptions[0].idx };
   }
-  return { type: "PLAY_TO_PORTFOLIO", index: best.idx };
+  if (portfolioOptions.length > 0) {
+    return { type: "PLAY_TO_PORTFOLIO", index: portfolioOptions[0].idx };
+  }
+  if (marketOptions.length > 0) {
+    return { type: "PLAY_TO_MARKET", index: marketOptions[0].idx };
+  }
+  return null;
 }
 
 function deckRemainingByCompany(state) {
@@ -340,6 +353,7 @@ function renderHandTotals(state, playerId) {
 }
 
 function render(state, singlePlayer) {
+  const gameSection = document.getElementById("game");
   const summary = document.getElementById("state-summary");
   const marketNode = document.getElementById("market");
   const monopolyNode = document.getElementById("monopoly");
@@ -347,6 +361,8 @@ function render(state, singlePlayer) {
   const actionNode = document.getElementById("actions");
   const results = document.getElementById("results");
   const scoreboard = document.getElementById("scoreboard");
+
+  gameSection.hidden = false;
 
   summary.innerHTML = `
     <div class="row">回合：${state.turn_number}</div>
@@ -465,7 +481,11 @@ function render(state, singlePlayer) {
     actionNode.innerHTML = "<div class='row muted'>AI 正在决策...</div>";
     setTimeout(() => {
       const choose = autoTakeAction(state) || aiAction(state);
-      if (choose) onAction(choose, true);
+      if (choose) {
+        onAction(choose, true);
+        return;
+      }
+      actionNode.innerHTML = "<div class='row muted'>AI 无可执行动作，等待下一步。</div>";
     }, 600);
   }
 }
@@ -483,7 +503,11 @@ function applyIfAllowed(action) {
 function onAction(action, skipAlert) {
   const result = applyAction(window.gameState, action);
   if (!result.accepted) {
-    if (!skipAlert) window.alert(result.message || "动作不可执行");
+    if (!skipAlert) {
+      window.alert(result.message || "动作不可执行");
+    } else {
+      window.console.warn(result.message || "动作不可执行");
+    }
     return;
   }
   window.gameState = result.state;

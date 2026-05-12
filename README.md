@@ -1,5 +1,9 @@
 # Startups 桌游 Python 实现（核心规则引擎）
 
+## Language / 语言
+
+中文 | [English](./README.en.md)
+
 这是一个用 Python 实现的《初创公司》桌游原型。  
 项目按“核心引擎 + 可替换展示层”结构开发，当前实现先覆盖 CLI 与单机 AI 对战，便于后续接入 GUI、API 或更高级 AI。
 
