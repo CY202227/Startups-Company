@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Startups Visual Match</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div class="inline">
+        <a href="index.html">中文</a> |
+        <a href="index-en.html">English</a>
+      </div>
+      <h1>Startups Visual Match (Web)</h1>
+      <p>This is a static frontend interface with multi-player manual mode or single-player (P0 human, P1+ AI).</p>
+    </header>
+
+    <section class="panel">
+      <h2>Setup</h2>
+      <label>
+        Players:
+        <input id="players" type="number" min="3" max="7" value="3" />
+      </label>
+      <label>
+        Seed (optional):
+        <input id="seed" type="number" placeholder="e.g., 101" />
+      </label>
+      <label>
+        <input id="single-player" type="checkbox" checked />
+        Single player (P0 is human, P1+ is AI)
+      </label>
+      <button id="new-game">New Game</button>
+      <button id="seed-random">Random Seed</button>
+    </section>
+
+    <section id="game" class="panel" hidden>
+      <h2>Current State</h2>
+      <div id="state-summary"></div>
+      <h3>Market</h3>
+      <div id="market"></div>
+      <h3>Anti-monopoly Holder</h3>
+      <div id="monopoly"></div>
+      <h3>Current Player</h3>
+      <div id="current-player"></div>
+      <h3>Available Actions</h3>
+      <div id="actions"></div>
+    </section>
+
+    <section id="results" class="panel" hidden>
+      <h2>Final Scores</h2>
+      <div id="scoreboard"></div>
+    </section>
+  </main>
+
+  <script>
+    window.UI_LOCALE = "en";
+  </script>
+  <script src="ui.js"></script>
+</body>
+</html>

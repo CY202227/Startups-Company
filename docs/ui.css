@@ -59,6 +59,10 @@ button:hover {
   opacity: 0.9;
 }
 
+button.active {
+  box-shadow: 0 0 0 2px #93c5fd inset;
+}
+
 button[disabled] {
   background: #6b7280;
   cursor: not-allowed;
