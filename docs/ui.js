@@ -497,11 +497,12 @@ function computeScores(state) {
     });
   }
   const totals = players.map((player) => player.cash + player.flipped_coins * 3 + player.penalty);
-  const winner = totals.reduce(
-    (best, value, idx) => (value > best.score ? { score: value, playerId: idx } : best),
-    { score: totals[0], playerId: 0 },
-  );
-  return { players, totals, winner: winner.playerId, payouts };
+  const best = Math.max(...totals);
+  const contenders = totals
+    .map((value, idx) => (value === best ? idx : -1))
+    .filter((idx) => idx !== -1);
+  const winner = contenders.length === 1 ? contenders[0] : null;
+  return { players, totals, winner, payouts };
 }
 
 function autoTakeAction(state) {
