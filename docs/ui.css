@@ -147,3 +147,12 @@ button[disabled] {
 .player-overview-row.you {
   border-color: var(--accent);
 }
+
+.portfolio-company-holder {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.portfolio-company-holder::before {
+  content: "★ ";
+}

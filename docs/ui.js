@@ -497,11 +497,12 @@ function computeScores(state) {
     });
   }
   const totals = players.map((player) => player.cash + player.flipped_coins * 3 + player.penalty);
-  const winner = totals.reduce(
-    (best, value, idx) => (value > best.score ? { score: value, playerId: idx } : best),
-    { score: totals[0], playerId: 0 },
-  );
-  return { players, totals, winner: winner.playerId, payouts };
+  const best = Math.max(...totals);
+  const contenders = totals
+    .map((value, idx) => (value === best ? idx : -1))
+    .filter((idx) => idx !== -1);
+  const winner = contenders.length === 1 ? contenders[0] : null;
+  return { players, totals, winner, payouts };
 }
 
 function autoTakeAction(state) {
@@ -615,13 +616,28 @@ function render(state, singlePlayer) {
   overviewNode.className = "players-overview";
   overviewNode.innerHTML = "";
   state.players.forEach((otherPlayer, idx) => {
+    const monopolized = new Set();
+    state.companies.forEach((company) => {
+      if (company.anti_monopoly_owner === idx) {
+        monopolized.add(company.company_id);
+      }
+    });
+
     const row = document.createElement("div");
     row.className = `player-overview-row${idx === state.current_player ? " you" : ""}`;
     const youLabel = idx === state.current_player ? ` ${t("overview_you")}` : "";
-    const portfolio = otherPlayer.portfolio
-      .map((count, companyId) => `${companyName(companyId)}:${count}`)
-      .join(" / ");
-    row.textContent = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: ${portfolio}`;
+    const baseText = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: `;
+
+    row.appendChild(document.createTextNode(baseText));
+    otherPlayer.portfolio.forEach((count, companyId) => {
+      const token = document.createElement("span");
+      token.className = monopolized.has(companyId) ? "portfolio-company-holder" : "";
+      token.textContent = `${companyName(companyId)}:${count}`;
+      row.appendChild(token);
+      if (companyId !== otherPlayer.portfolio.length - 1) {
+        row.appendChild(document.createTextNode(" / "));
+      }
+    });
     overviewNode.appendChild(row);
   });
 
