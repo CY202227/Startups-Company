@@ -615,13 +615,28 @@ function render(state, singlePlayer) {
   overviewNode.className = "players-overview";
   overviewNode.innerHTML = "";
   state.players.forEach((otherPlayer, idx) => {
+    const monopolized = new Set();
+    state.companies.forEach((company) => {
+      if (company.anti_monopoly_owner === idx) {
+        monopolized.add(company.company_id);
+      }
+    });
+
     const row = document.createElement("div");
     row.className = `player-overview-row${idx === state.current_player ? " you" : ""}`;
     const youLabel = idx === state.current_player ? ` ${t("overview_you")}` : "";
-    const portfolio = otherPlayer.portfolio
-      .map((count, companyId) => `${companyName(companyId)}:${count}`)
-      .join(" / ");
-    row.textContent = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: ${portfolio}`;
+    const baseText = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: `;
+
+    row.appendChild(document.createTextNode(baseText));
+    otherPlayer.portfolio.forEach((count, companyId) => {
+      const token = document.createElement("span");
+      token.className = monopolized.has(companyId) ? "portfolio-company-holder" : "";
+      token.textContent = `${companyName(companyId)}:${count}`;
+      row.appendChild(token);
+      if (companyId !== otherPlayer.portfolio.length - 1) {
+        row.appendChild(document.createTextNode(" / "));
+      }
+    });
     overviewNode.appendChild(row);
   });
 
