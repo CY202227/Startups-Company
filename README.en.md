@@ -2,7 +2,7 @@
 
 ## Language / 语言
 
- [中文](./README.md) | English
+[中文](./README.zh.md) | English (default)
 
 This project is a prototype implementation of the board game *Startups* in Python.
 It follows a **core engine + replaceable UI** architecture, currently covering CLI and
@@ -35,7 +35,7 @@ python -m pip install -U pip
 pip install -e .
 ```
 
-After installation, use the `startups` command directly.  
+After installation, use the `startups` command directly.
 If you prefer not to install the console script, run the module directly.
 
 ## Run Modes
@@ -84,31 +84,33 @@ python -m http.server 8080 --directory docs
 
 ## CLI Commands
 
-- `d` / `draw`：draw from deck
-- `m <idx>`：take from market, e.g., `m 0`
-- `p <idx>`：place in personal holdings, e.g., `p 1`
-- `s <idx>`：place into market, e.g., `s 1`
-- `state`：print current state
-- `h`：help
-- `q`：quit
+- `d` / `draw`: draw from deck
+- `m <idx>`: take from market, e.g., `m 0`
+- `p <idx>`: place in personal holdings, e.g., `p 1`
+- `s <idx>`: place into market, e.g., `s 1`
+- `state`: print current state
+- `h`: help
+- `q`: quit
 
 ## Project Structure
 
-- `src/startups/domain.py`：domain entities (`GameState`, `PlayerState`, `CompanyState`, `MarketCard`)
-- `src/startups/rules.py`：action/stage enums, game constants, card setup
-- `src/startups/engine.py`：state machine and action reducer
-- `src/startups/actions.py`：command parsing
-- `src/startups/scoring.py`：scoring logic
-- `src/startups/ai.py`：AI decision module
-- `src/startups/cli.py`：CLI interactive layer
-- `src/startups/main.py`：program entrypoint
-- `docs/rules_ref.md`：rule mapping and constraints
-- `tests/`：unit tests (phase, action, scoring, reproducibility)
+- `src/startups/domain.py`: domain entities (`GameState`, `PlayerState`, `CompanyState`, `MarketCard`)
+- `src/startups/rules.py`: action/stage enums, game constants, card setup
+- `src/startups/engine.py`: state machine and action reducer
+- `src/startups/actions.py`: command parsing
+- `src/startups/scoring.py`: scoring logic
+- `src/startups/ai.py`: AI decision module
+- `src/startups/cli.py`: CLI interactive layer
+- `src/startups/main.py`: program entrypoint
+- `docs/rules_ref_en.md`: rule mapping (default display)
+- `docs/rules_ref.md`: rule mapping (Chinese)
+- `tests/`: unit tests (phase, action, scoring, reproducibility)
 
 ## Current Limitations
 
 - Underpayment at scoring is tracked using a replay-friendly negative penalty (`penalty`).
-- Current implementation is a minimal one-round model; advanced AI and network multiplayer are not yet integrated.
+- Current implementation is a minimal one-round model; advanced AI and network multiplayer
+  are not yet integrated.
 - Rule details from the original game can be expanded further while preserving the same structure.
 
 ## Run Tests
@@ -121,4 +123,5 @@ pytest
 
 - This project is for learning/implementation purposes.
 - No commercial assets are included.
-- Rule text references and company names are in `docs/rules_ref.md` and the project plan.
+- Rule text references and company names are in `docs/rules_ref_en.md` and
+  `docs/rules_ref.md` (Chinese translation), plus the project plan.

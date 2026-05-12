@@ -829,7 +829,7 @@ window.onload = () => {
   const savedLocale = window.localStorage.getItem("startups-locale");
   if (savedLocale) {
     window.UI_LOCALE = savedLocale === "en" ? "en" : "zh";
-  } else if (window.UI_LOCALE !== "en") {
+  } else if (window.UI_LOCALE !== "zh") {
     window.UI_LOCALE = "zh";
   }
   applyLocaleTexts();
