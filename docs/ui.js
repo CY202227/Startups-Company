@@ -25,6 +25,10 @@ const I18N = {
     state_title: "当前局面",
     market_title: "市场",
     monopoly_title: "公司反垄断持有人",
+    players_overview_title: "牌桌详情",
+    overview_you: "（你）",
+    overview_cash: "现金",
+    overview_portfolio: "持股",
     current_title: "当前玩家",
     actions_title: "可选动作",
     result_title: "结算结果",
@@ -49,6 +53,7 @@ const I18N = {
     you_suffix: "（你）",
     hand_title: "手牌",
     hand_line: "{idx}）{name}（总量：{total}）",
+    ai_hand_hidden: "当前为 AI 回合，手牌对你隐藏。",
     cash: "现金：{value}",
     portfolio: "持股：{value}",
     tie_result: "平局",
@@ -83,6 +88,10 @@ const I18N = {
     state_title: "Current State",
     market_title: "Market",
     monopoly_title: "Anti-monopoly Holder",
+    players_overview_title: "Table Overview",
+    overview_you: "(You)",
+    overview_cash: "Cash",
+    overview_portfolio: "Portfolio",
     current_title: "Current Player",
     actions_title: "Available Actions",
     result_title: "Final Scores",
@@ -107,6 +116,7 @@ const I18N = {
     you_suffix: "(You)",
     hand_title: "Hand",
     hand_line: "{idx}) {name} (Total: {total})",
+    ai_hand_hidden: "Current player is AI. Their hand is hidden.",
     cash: "Cash: {value}",
     portfolio: "Portfolio: {value}",
     tie_result: "Tie",
@@ -182,6 +192,7 @@ function applyLocaleTexts() {
   applyLocaleTextById("state-title", "state_title");
   applyLocaleTextById("market-title", "market_title");
   applyLocaleTextById("monopoly-title", "monopoly_title");
+  applyLocaleTextById("players-overview-title", "players_overview_title");
   applyLocaleTextById("current-title", "current_title");
   applyLocaleTextById("actions-title", "actions_title");
   applyLocaleTextById("result-title", "result_title");
@@ -280,6 +291,8 @@ function setupGame(playerCount, seed) {
 function recomputeAntiMonopoly(state) {
   const nextCompanies = clone(state.companies);
   for (const company of nextCompanies) {
+    // 平手时不消失：只要当前持有者仍与最高持股持平，就继续保留；
+    // 只有当别的玩家成为严格唯一第一名时才转移。
     const share = state.players.map((player) => player.portfolio[company.company_id]);
     const maxShare = Math.max(...share);
     if (maxShare <= 0) {
@@ -290,7 +303,20 @@ function recomputeAntiMonopoly(state) {
       if (count === maxShare) out.push(idx);
       return out;
     }, []);
-    company.anti_monopoly_owner = owners.length === 1 ? owners[0] : null;
+
+    if (owners.length === 1) {
+      company.anti_monopoly_owner = owners[0];
+      continue;
+    }
+
+    if (
+      company.anti_monopoly_owner !== null &&
+      share[company.anti_monopoly_owner] === maxShare
+    ) {
+      continue;
+    }
+
+    company.anti_monopoly_owner = null;
   }
   return nextCompanies;
 }
@@ -535,6 +561,7 @@ function render(state, singlePlayer) {
   const summary = document.getElementById("state-summary");
   const marketNode = document.getElementById("market");
   const monopolyNode = document.getElementById("monopoly");
+  const overviewNode = document.getElementById("players-overview");
   const currentNode = document.getElementById("current-player");
   const actionNode = document.getElementById("actions");
   const results = document.getElementById("results");
@@ -585,23 +612,43 @@ function render(state, singlePlayer) {
     monopolyNode.appendChild(row);
   });
 
+  overviewNode.className = "players-overview";
+  overviewNode.innerHTML = "";
+  state.players.forEach((otherPlayer, idx) => {
+    const row = document.createElement("div");
+    row.className = `player-overview-row${idx === state.current_player ? " you" : ""}`;
+    const youLabel = idx === state.current_player ? ` ${t("overview_you")}` : "";
+    const portfolio = otherPlayer.portfolio
+      .map((count, companyId) => `${companyName(companyId)}:${count}`)
+      .join(" / ");
+    row.textContent = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: ${portfolio}`;
+    overviewNode.appendChild(row);
+  });
+
   currentNode.innerHTML = "";
   const player = state.players[state.current_player];
+  const isCurrentHuman = !singlePlayer || state.current_player === 0;
   const handTitle = document.createElement("div");
   handTitle.className = "row";
   handTitle.innerHTML = `<strong>${t("hand_title")}</strong>`;
   currentNode.appendChild(handTitle);
-
-  player.hand.forEach((cardId, idx) => {
-    const line = document.createElement("div");
-    line.className = "row";
-    line.textContent = t("hand_line", {
-      idx,
-      name: companyName(cardId),
-      total: COMPANIES[cardId].total,
+  if (isCurrentHuman) {
+    player.hand.forEach((cardId, idx) => {
+      const line = document.createElement("div");
+      line.className = "row";
+      line.textContent = t("hand_line", {
+        idx,
+        name: companyName(cardId),
+        total: COMPANIES[cardId].total,
+      });
+      currentNode.appendChild(line);
     });
-    currentNode.appendChild(line);
-  });
+  } else {
+    const row = document.createElement("div");
+    row.className = "row muted";
+    row.textContent = t("ai_hand_hidden");
+    currentNode.appendChild(row);
+  }
 
   const portfolioText = player.portfolio
     .map((count, idx) => `${companyName(idx)}：${count}`)

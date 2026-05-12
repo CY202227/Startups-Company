@@ -427,6 +427,8 @@ def _recompute_anti_monopoly(
 ) -> tuple[CompanyState, ...]:
   holder: list[int | None] = []
   for company in companies:
+    # Keep previous holder on ties when they are still tied at the top;
+    # only transfer holder when someone becomes the unique new maximum.
     shares = [player.portfolio[company.company_id] for player in players]
     max_shares = max(shares) if shares else 0
     if max_shares <= 0:
@@ -434,7 +436,10 @@ def _recompute_anti_monopoly(
       continue
     candidates = [idx for idx, count in enumerate(shares) if count == max_shares]
     if len(candidates) != 1:
-      holder.append(None)
+      if company.anti_monopoly_owner is not None and shares[company.anti_monopoly_owner] == max_shares:
+        holder.append(company.anti_monopoly_owner)
+      else:
+        holder.append(None)
       continue
     holder.append(candidates[0])
 
