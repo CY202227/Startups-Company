@@ -101,6 +101,5 @@ def _winner(scores: tuple[int, ...]) -> Optional[int]:
   best = max(scores)
   contenders = [idx for idx, score in enumerate(scores) if score == best]
   if len(contenders) != 1:
-    # 稳定性：同分取 player_id 小者。
-    return contenders[0]
+    return None
   return contenders[0]

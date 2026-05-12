@@ -182,9 +182,7 @@ def _print_state(state: GameState) -> None:
   print(f"阶段: {state.stage.name}")
   print(f"当前玩家: P{state.current_player}")
   print(f"抽牌堆剩余: {len(state.deck)}")
-  deck_counts = _deck_counts(state)
   current = state.players[state.current_player]
-  hand_counts = _hand_counts(current.hand)
   token_names = [
     _company_name(cfg.company_id)
     for cfg in state.companies
@@ -196,10 +194,10 @@ def _print_state(state: GameState) -> None:
     print(f"现金: {current.cash} | 持有反垄断: 无")
   print("手牌:")
   for idx, card in enumerate(current.hand):
-    total_known = deck_counts[card] + hand_counts[card]
+    total_all = DEFAULT_COMPANIES[card].card_count
     print(
       f"  {idx}: {_company_name(card)} "
-      f"[总量:{total_known}]"
+      f"[总量:{total_all}]"
     )
   print("市场:")
   if not state.market:
@@ -237,7 +235,7 @@ def _print_scores(state: GameState, score: ScoreSnapshot) -> None:
       f"penalty={player.penalty}, score={score.scores[pid]}",
     )
   if score.winner is None:
-    print("无有效玩家。")
+    print("平局")
   else:
     print(f"冠军：P{score.winner}")
   print("支付明细:")
@@ -246,20 +244,6 @@ def _print_scores(state: GameState, score: ScoreSnapshot) -> None:
       f"  P{item.payer_id} -> P{item.holder_id}: "
       f"{item.paid}/{item.required} for 公司 {_company_name(item.company_id)}",
     )
-
-
-def _deck_counts(state: GameState) -> dict[int, int]:
-  counts = {cfg.company_id: 0 for cfg in DEFAULT_COMPANIES}
-  for card in state.deck:
-    counts[card] += 1
-  return counts
-
-
-def _hand_counts(hand: tuple[int, ...]) -> dict[int, int]:
-  counts: dict[int, int] = {}
-  for card in hand:
-    counts[card] = counts.get(card, 0) + 1
-  return counts
 
 
 if __name__ == "__main__":

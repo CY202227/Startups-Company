@@ -11,6 +11,210 @@ const STAGE_TAKE = "TAKE";
 const STAGE_PLAY = "PLAY";
 const STAGE_FINISHED = "FINISHED";
 
+const I18N = {
+  zh: {
+    title: "Startups 可视化对局（Web）",
+    subtitle: "本页面为静态版前端界面，支持多人手动/单人局（P0 人类，P1+ AI）。",
+    setup_title: "开局设置",
+    players_label: "人数：",
+    seed_label: "种子（可留空）：",
+    seed_placeholder: "例如 101",
+    single_player_label: "单人局（P0 人类，P1+ AI）",
+    new_game_btn: "开始新游戏",
+    random_seed_btn: "随机种子",
+    state_title: "当前局面",
+    market_title: "市场",
+    monopoly_title: "公司反垄断持有人",
+    players_overview_title: "牌桌详情",
+    overview_you: "（你）",
+    overview_cash: "现金",
+    overview_portfolio: "持股",
+    current_title: "当前玩家",
+    actions_title: "可选动作",
+    result_title: "结算结果",
+    // existing keys ...
+    game_ended: "游戏已结束",
+    not_take_stage: "当前不是 TAKE 阶段",
+    not_play_stage: "当前不是 PLAY 阶段",
+    deck_empty: "抽牌堆已空",
+    insufficient_cash: "现金不足，需 {cost} 金币",
+    index_market_oob: "市场索引越界",
+    anti_monopoly_forbid: "反垄断限制，不可拿该牌",
+    hand_index_oob: "手牌索引越界",
+    market_recent_forbid: "你刚从市场拿到该公司牌，不能直接打回市场。",
+    unknown_action: "未知动作",
+    ai_thinking: "AI 正在决策...",
+    ai_no_action: "AI 无可执行动作，等待下一步。",
+    game_action_invalid: "动作不可执行",
+    no_market_card: "（当前无市场牌）",
+    blocked_market_card: "不可取（反垄断）",
+    market_card: "可取",
+    holder_none: "无人",
+    you_suffix: "（你）",
+    hand_title: "手牌",
+    hand_line: "{idx}）{name}（总量：{total}）",
+    ai_hand_hidden: "当前为 AI 回合，手牌对你隐藏。",
+    cash: "现金：{value}",
+    portfolio: "持股：{value}",
+    tie_result: "平局",
+    draw_from_deck_btn: "从牌堆抽取（花费 {cost} 金币）",
+    take_market_btn: "拿市场 #{idx}（{name}，总量：{total}，+{coins}）",
+    to_portfolio_btn: "放入资本账户",
+    to_market_btn: "放入市场",
+    no_hand_skip: "无手牌，回合自动结束。",
+    result_prefix: "胜者：P{winner}",
+    score_line: "P{idx}：{total}（现金 {cash}，翻牌 {flipped}，罚金 {penalty}）",
+    turn_label: "回合：{value}",
+    stage_label: "阶段：{value}",
+    player_label: "当前玩家：P{value}",
+    deck_left_label: "抽牌堆剩余：{value}",
+    event_label: "最新事件：{value}",
+    players_limit: "支持 3-7 人玩家。",
+    stage_take: "拿牌",
+    stage_play: "出牌",
+    stage_finished: "结束",
+  },
+  en: {
+    title: "Startups Visual Match (Web)",
+    subtitle:
+      "This is a static frontend interface with multi-player manual mode or single-player (P0 is human, P1+ AI).",
+    setup_title: "Setup",
+    players_label: "Players:",
+    seed_label: "Seed (optional):",
+    seed_placeholder: "e.g., 101",
+    single_player_label: "Single player (P0 is human, P1+ AI)",
+    new_game_btn: "New Game",
+    random_seed_btn: "Random Seed",
+    state_title: "Current State",
+    market_title: "Market",
+    monopoly_title: "Anti-monopoly Holder",
+    players_overview_title: "Table Overview",
+    overview_you: "(You)",
+    overview_cash: "Cash",
+    overview_portfolio: "Portfolio",
+    current_title: "Current Player",
+    actions_title: "Available Actions",
+    result_title: "Final Scores",
+    // existing keys ...
+    game_ended: "Game over",
+    not_take_stage: "Current phase is not TAKE",
+    not_play_stage: "Current phase is not PLAY",
+    deck_empty: "Deck is empty",
+    insufficient_cash: "Not enough cash. Need {cost}.",
+    index_market_oob: "Market index out of range",
+    anti_monopoly_forbid: "Cannot take this card due to anti-monopoly restriction",
+    hand_index_oob: "Hand index out of range",
+    market_recent_forbid: "You cannot put this card back to market immediately.",
+    unknown_action: "Unknown action",
+    ai_thinking: "AI is deciding...",
+    ai_no_action: "AI has no valid action and is waiting.",
+    game_action_invalid: "Invalid action",
+    no_market_card: "(No cards in market)",
+    blocked_market_card: "Blocked (anti-monopoly)",
+    market_card: "Available",
+    holder_none: "No owner",
+    you_suffix: "(You)",
+    hand_title: "Hand",
+    hand_line: "{idx}) {name} (Total: {total})",
+    ai_hand_hidden: "Current player is AI. Their hand is hidden.",
+    cash: "Cash: {value}",
+    portfolio: "Portfolio: {value}",
+    tie_result: "Tie",
+    draw_from_deck_btn: "Draw from deck (cost {cost})",
+    take_market_btn: "Take market #{idx} ({name}, total: {total}, +{coins})",
+    to_portfolio_btn: "To portfolio",
+    to_market_btn: "To market",
+    no_hand_skip: "No cards in hand, turn auto-skips.",
+    result_prefix: "Winner: P{winner}",
+    score_line: "P{idx}: {total} (Cash {cash}, Flipped {flipped}, Penalty {penalty})",
+    turn_label: "Turn: {value}",
+    stage_label: "Phase: {value}",
+    player_label: "Current player: P{value}",
+    deck_left_label: "Deck left: {value}",
+    event_label: "Latest event: {value}",
+    players_limit: "Players must be between 3 and 7.",
+    stage_take: "Take",
+    stage_play: "Play",
+    stage_finished: "Finished",
+  },
+};
+
+function currentLocale() {
+  if (window.UI_LOCALE === "en") return "en";
+  return "zh";
+}
+
+function setLocale(locale) {
+  const next = locale === "en" ? "en" : "zh";
+  window.UI_LOCALE = next;
+  window.localStorage.setItem("startups-locale", next);
+  applyLocaleTexts();
+  if (window.gameState) {
+    render(window.gameState, window.singlePlayer);
+  }
+}
+
+function syncLocaleButtons() {
+  const locale = currentLocale();
+  const zhBtn = document.getElementById("lang-zh");
+  const enBtn = document.getElementById("lang-en");
+  if (!zhBtn || !enBtn) return;
+  zhBtn.classList.toggle("active", locale === "zh");
+  enBtn.classList.toggle("active", locale === "en");
+}
+
+function applyLocaleTextById(elementId, key, params) {
+  const node = document.getElementById(elementId);
+  if (!node) return;
+  node.textContent = t(key, params);
+}
+
+function applyLocaleAttributeById(elementId, attribute, key, params) {
+  const node = document.getElementById(elementId);
+  if (!node) return;
+  node.setAttribute(attribute, t(key, params));
+}
+
+function applyLocaleTexts() {
+  const locale = currentLocale();
+  document.documentElement.lang = locale === "en" ? "en" : "zh-CN";
+  document.title = t("title");
+
+  applyLocaleTextById("app-title", "title");
+  applyLocaleTextById("app-subtitle", "subtitle");
+  applyLocaleTextById("setup-title", "setup_title");
+  applyLocaleTextById("players-label", "players_label");
+  applyLocaleTextById("seed-label", "seed_label");
+  applyLocaleAttributeById("seed", "placeholder", "seed_placeholder");
+  applyLocaleTextById("single-player-label", "single_player_label");
+  applyLocaleTextById("new-game", "new_game_btn");
+  applyLocaleTextById("seed-random", "random_seed_btn");
+  applyLocaleTextById("state-title", "state_title");
+  applyLocaleTextById("market-title", "market_title");
+  applyLocaleTextById("monopoly-title", "monopoly_title");
+  applyLocaleTextById("players-overview-title", "players_overview_title");
+  applyLocaleTextById("current-title", "current_title");
+  applyLocaleTextById("actions-title", "actions_title");
+  applyLocaleTextById("result-title", "result_title");
+  syncLocaleButtons();
+}
+
+function t(key, params) {
+  const locale = currentLocale();
+  const item = I18N[locale][key] || I18N.zh[key];
+  if (typeof item === "string" && params) {
+    return item.replace(/{(\w+)}/g, (_, name) => String(params[name] ?? ""));
+  }
+  return item || key;
+}
+
+function stageText(stage) {
+  if (stage === STAGE_TAKE) return t("stage_take");
+  if (stage === STAGE_PLAY) return t("stage_play");
+  if (stage === STAGE_FINISHED) return t("stage_finished");
+  return stage;
+}
+
 function mulberry32(seed) {
   return function () {
     seed |= 0;
@@ -87,6 +291,8 @@ function setupGame(playerCount, seed) {
 function recomputeAntiMonopoly(state) {
   const nextCompanies = clone(state.companies);
   for (const company of nextCompanies) {
+    // 平手时不消失：只要当前持有者仍与最高持股持平，就继续保留；
+    // 只有当别的玩家成为严格唯一第一名时才转移。
     const share = state.players.map((player) => player.portfolio[company.company_id]);
     const maxShare = Math.max(...share);
     if (maxShare <= 0) {
@@ -97,7 +303,20 @@ function recomputeAntiMonopoly(state) {
       if (count === maxShare) out.push(idx);
       return out;
     }, []);
-    company.anti_monopoly_owner = owners.length === 1 ? owners[0] : null;
+
+    if (owners.length === 1) {
+      company.anti_monopoly_owner = owners[0];
+      continue;
+    }
+
+    if (
+      company.anti_monopoly_owner !== null &&
+      share[company.anti_monopoly_owner] === maxShare
+    ) {
+      continue;
+    }
+
+    company.anti_monopoly_owner = null;
   }
   return nextCompanies;
 }
@@ -148,19 +367,19 @@ function applyAction(state, action) {
   const pid = state.current_player;
 
   if (state.stage === STAGE_FINISHED) {
-    return { state, accepted: false, message: "游戏已结束" };
+    return { state, accepted: false, message: t("game_ended") };
   }
 
   if (action.type === "TAKE_FROM_DECK") {
     if (state.stage !== STAGE_TAKE) {
-      return { state, accepted: false, message: "当前不是 TAKE 阶段" };
+      return { state, accepted: false, message: t("not_take_stage") };
     }
     if (!state.deck.length) {
-      return { state, accepted: false, message: "抽牌堆已空" };
+      return { state, accepted: false, message: t("deck_empty") };
     }
     const cost = marketDrawCost(state, pid);
     if (player.cash < cost) {
-      return { state, accepted: false, message: `现金不足，需 ${cost} 金币` };
+      return { state, accepted: false, message: t("insufficient_cash", { cost }) };
     }
     const card = state.deck[0];
     next.deck = state.deck.slice(1);
@@ -178,15 +397,15 @@ function applyAction(state, action) {
 
   if (action.type === "TAKE_FROM_MARKET") {
     if (state.stage !== STAGE_TAKE) {
-      return { state, accepted: false, message: "当前不是 TAKE 阶段" };
+      return { state, accepted: false, message: t("not_take_stage") };
     }
     const idx = action.index;
     if (idx < 0 || idx >= state.market.length) {
-      return { state, accepted: false, message: "市场索引越界" };
+      return { state, accepted: false, message: t("index_market_oob") };
     }
     const card = state.market[idx];
     if (companyOwner(state, card.company_id) === pid) {
-      return { state, accepted: false, message: "反垄断限制，不可拿该牌" };
+      return { state, accepted: false, message: t("anti_monopoly_forbid") };
     }
     next.market = state.market.filter((_, i) => i !== idx);
     player.hand = [...player.hand, card.company_id];
@@ -201,11 +420,11 @@ function applyAction(state, action) {
 
   if (action.type === "PLAY_TO_PORTFOLIO") {
     if (state.stage !== STAGE_PLAY) {
-      return { state, accepted: false, message: "当前不是 PLAY 阶段" };
+      return { state, accepted: false, message: t("not_play_stage") };
     }
     const idx = action.index;
     if (idx < 0 || idx >= state.players[pid].hand.length) {
-      return { state, accepted: false, message: "手牌索引越界" };
+      return { state, accepted: false, message: t("hand_index_oob") };
     }
     const cardId = player.hand[idx];
     player.hand = [...player.hand.slice(0, idx), ...player.hand.slice(idx + 1)];
@@ -220,18 +439,18 @@ function applyAction(state, action) {
 
   if (action.type === "PLAY_TO_MARKET") {
     if (state.stage !== STAGE_PLAY) {
-      return { state, accepted: false, message: "当前不是 PLAY 阶段" };
+      return { state, accepted: false, message: t("not_play_stage") };
     }
     const idx = action.index;
     if (idx < 0 || idx >= state.players[pid].hand.length) {
-      return { state, accepted: false, message: "手牌索引越界" };
+      return { state, accepted: false, message: t("hand_index_oob") };
     }
     const cardId = player.hand[idx];
     if (state.last_took_from_market && state.last_took_company === cardId) {
       return {
         state,
         accepted: false,
-        message: "你刚从市场拿到该公司牌，不能直接打回市场。",
+        message: t("market_recent_forbid"),
       };
     }
     player.hand = [...player.hand.slice(0, idx), ...player.hand.slice(idx + 1)];
@@ -243,7 +462,7 @@ function applyAction(state, action) {
     return { state: finishTurn(next), accepted: true };
   }
 
-  return { state, accepted: false, message: "未知动作" };
+  return { state, accepted: false, message: t("unknown_action") };
 }
 
 function computeScores(state) {
@@ -337,26 +556,12 @@ function aiAction(state) {
   return null;
 }
 
-function deckRemainingByCompany(state) {
-  const table = {};
-  for (const company of COMPANIES) table[company.id] = company.total;
-  for (const card of state.deck) table[card] -= 1;
-  return table;
-}
-
-function renderHandTotals(state, playerId) {
-  const deckTable = deckRemainingByCompany(state);
-  const player = state.players[playerId];
-  const counts = {};
-  for (const card of player.hand) counts[card] = (counts[card] || 0) + 1;
-  return { counts, deckTable };
-}
-
 function render(state, singlePlayer) {
   const gameSection = document.getElementById("game");
   const summary = document.getElementById("state-summary");
   const marketNode = document.getElementById("market");
   const monopolyNode = document.getElementById("monopoly");
+  const overviewNode = document.getElementById("players-overview");
   const currentNode = document.getElementById("current-player");
   const actionNode = document.getElementById("actions");
   const results = document.getElementById("results");
@@ -365,25 +570,32 @@ function render(state, singlePlayer) {
   gameSection.hidden = false;
 
   summary.innerHTML = `
-    <div class="row">回合：${state.turn_number}</div>
-    <div class="row">阶段：${state.stage}</div>
-    <div class="row">当前玩家：P${state.current_player}${state.current_player === 0 ? "（你）" : ""}</div>
-    <div class="row">抽牌堆剩余：${state.deck.length}</div>
-    <div class="row">最新事件：${state.events[state.events.length - 1]}</div>
+    <div class="row">${t("turn_label", { value: state.turn_number })}</div>
+    <div class="row">${t("stage_label", { value: stageText(state.stage) })}</div>
+    <div class="row">${t("player_label", {
+    value: `${state.current_player}${state.current_player === 0 ? ` ${t("you_suffix")}` : ""}`,
+  })}</div>
+    <div class="row">${t("deck_left_label", { value: state.deck.length })}</div>
+    <div class="row">${t("event_label", { value: state.events[state.events.length - 1] })}</div>
   `;
 
   marketNode.innerHTML = "";
   if (!state.market.length) {
-    marketNode.innerHTML = "<div class='row muted'>（当前无市场牌）</div>";
+    marketNode.innerHTML = `<div class='row muted'>${t("no_market_card")}</div>`;
   } else {
     state.market.forEach((card, idx) => {
       const owner = companyOwner(state, card.company_id);
       const blocked = owner === state.current_player;
+      const companyTotal = COMPANIES[card.company_id].total;
       const node = document.createElement("div");
       node.className = `market-card ${blocked ? "blocked" : ""}`;
-      node.textContent = `#${idx} ${companyName(card.company_id)}，金币:${card.coins}，`;
+      if (currentLocale() === "en") {
+        node.textContent = `#${idx} ${companyName(card.company_id)}, total: ${companyTotal}, coins: ${card.coins}, `;
+      } else {
+        node.textContent = `#${idx} ${companyName(card.company_id)}（总量：${companyTotal}），金币:${card.coins}，`;
+      }
       const flag = document.createElement("span");
-      flag.textContent = blocked ? "不可取（反垄断）" : "可取";
+      flag.textContent = blocked ? t("blocked_market_card") : t("market_card");
       flag.className = blocked ? "muted" : "winner";
       node.appendChild(flag);
       marketNode.appendChild(node);
@@ -395,39 +607,62 @@ function render(state, singlePlayer) {
     const row = document.createElement("div");
     row.className = "row";
     row.textContent = `${companyName(company.company_id)}：${company.anti_monopoly_owner === null
-      ? "无人"
+      ? t("holder_none")
       : `P${company.anti_monopoly_owner}`}`;
     monopolyNode.appendChild(row);
   });
 
+  overviewNode.className = "players-overview";
+  overviewNode.innerHTML = "";
+  state.players.forEach((otherPlayer, idx) => {
+    const row = document.createElement("div");
+    row.className = `player-overview-row${idx === state.current_player ? " you" : ""}`;
+    const youLabel = idx === state.current_player ? ` ${t("overview_you")}` : "";
+    const portfolio = otherPlayer.portfolio
+      .map((count, companyId) => `${companyName(companyId)}:${count}`)
+      .join(" / ");
+    row.textContent = `P${idx}${youLabel} | ${t("overview_cash")}: ${otherPlayer.cash} | ${t("overview_portfolio")}: ${portfolio}`;
+    overviewNode.appendChild(row);
+  });
+
   currentNode.innerHTML = "";
   const player = state.players[state.current_player];
-  const handInfo = renderHandTotals(state, state.current_player);
+  const isCurrentHuman = !singlePlayer || state.current_player === 0;
   const handTitle = document.createElement("div");
   handTitle.className = "row";
-  handTitle.innerHTML = "<strong>手牌</strong>";
+  handTitle.innerHTML = `<strong>${t("hand_title")}</strong>`;
   currentNode.appendChild(handTitle);
-
-  player.hand.forEach((cardId, idx) => {
-    const total = (handInfo.deckTable[cardId] || 0) + (handInfo.counts[cardId] || 0);
-    const line = document.createElement("div");
-    line.className = "row";
-    line.textContent = `${idx}）${companyName(cardId)}（总量：${total}）`;
-    currentNode.appendChild(line);
-  });
+  if (isCurrentHuman) {
+    player.hand.forEach((cardId, idx) => {
+      const line = document.createElement("div");
+      line.className = "row";
+      line.textContent = t("hand_line", {
+        idx,
+        name: companyName(cardId),
+        total: COMPANIES[cardId].total,
+      });
+      currentNode.appendChild(line);
+    });
+  } else {
+    const row = document.createElement("div");
+    row.className = "row muted";
+    row.textContent = t("ai_hand_hidden");
+    currentNode.appendChild(row);
+  }
 
   const portfolioText = player.portfolio
     .map((count, idx) => `${companyName(idx)}：${count}`)
     .join(" / ");
-  currentNode.innerHTML += `<div class="row">现金：${player.cash}</div>`;
-  currentNode.innerHTML += `<div class="row">持股：${portfolioText}</div>`;
+  currentNode.innerHTML += `<div class="row">${t("cash", { value: player.cash })}</div>`;
+  currentNode.innerHTML += `<div class="row">${t("portfolio", { value: portfolioText })}</div>`;
 
   actionNode.innerHTML = "";
+  actionNode.className = "actions-grid";
   if (state.stage === STAGE_TAKE) {
     const cost = marketDrawCost(state, state.current_player);
     const auto = autoTakeAction(state);
     const deckBtn = document.createElement("button");
-    deckBtn.textContent = `从牌堆抽取（花费 ${cost} 金币）`;
+    deckBtn.textContent = t("draw_from_deck_btn", { cost });
     deckBtn.disabled = auto ? false : player.cash < cost || state.deck.length === 0;
     deckBtn.onclick = () => onAction({ type: "TAKE_FROM_DECK" });
     actionNode.appendChild(deckBtn);
@@ -435,27 +670,47 @@ function render(state, singlePlayer) {
     state.market.forEach((card, idx) => {
       const banned = companyOwner(state, card.company_id) === state.current_player;
       const btn = document.createElement("button");
-      btn.textContent = `拿市场 #${idx}（${companyName(card.company_id)}，+${card.coins}）`;
+      btn.textContent = t("take_market_btn", {
+        idx: `${idx}`,
+        name: companyName(card.company_id),
+        coins: card.coins,
+        total: COMPANIES[card.company_id].total,
+      });
       btn.disabled = banned;
       btn.onclick = () => onAction({ type: "TAKE_FROM_MARKET", index: idx });
       actionNode.appendChild(btn);
     });
   } else if (state.stage === STAGE_PLAY) {
     if (!player.hand.length) {
-      actionNode.innerHTML = "<div class='muted'>无手牌，回合自动结束。</div>";
+      actionNode.innerHTML = `<div class='muted'>${t("no_hand_skip")}</div>`;
+      actionNode.className = "actions-grid";
     }
     player.hand.forEach((cardId, idx) => {
+      const row = document.createElement("div");
+      row.className = "action-row action-card-line";
+      const title = document.createElement("span");
+      title.className = "action-card-title";
+      title.textContent = `${idx}: ${companyName(cardId)}`;
+      row.appendChild(title);
+
       const toPortfolio = document.createElement("button");
-      toPortfolio.textContent = `${idx} 放入 ${companyName(cardId)} 资本账户`;
+      toPortfolio.textContent = t("to_portfolio_btn", {
+        idx,
+        name: companyName(cardId),
+      });
       toPortfolio.onclick = () => onAction({ type: "PLAY_TO_PORTFOLIO", index: idx });
-      actionNode.appendChild(toPortfolio);
+      row.appendChild(toPortfolio);
 
       const toMarket = document.createElement("button");
       const disabled = state.last_took_from_market && state.last_took_company === cardId;
-      toMarket.textContent = `${idx} 放入市场 ${companyName(cardId)}`;
+      toMarket.textContent = t("to_market_btn", {
+        idx,
+        name: companyName(cardId),
+      });
       toMarket.disabled = disabled;
       toMarket.onclick = () => onAction({ type: "PLAY_TO_MARKET", index: idx });
-      actionNode.appendChild(toMarket);
+      row.appendChild(toMarket);
+      actionNode.appendChild(row);
     });
   }
 
@@ -467,25 +722,34 @@ function render(state, singlePlayer) {
       const row = document.createElement("div");
       const isWinner = idx === result.winner;
       row.className = `row ${isWinner ? "winner" : ""}`;
-      row.textContent = `P${idx}：${total}（现金 ${result.players[idx].cash}，翻牌 ${result.players[idx].flipped_coins}，罚金 ${result.players[idx].penalty}）`;
+      row.textContent = t("score_line", {
+        idx,
+        total,
+        cash: result.players[idx].cash,
+        flipped: result.players[idx].flipped_coins,
+        penalty: result.players[idx].penalty,
+      });
       scoreboard.appendChild(row);
     });
     const winnerLine = document.createElement("div");
     winnerLine.className = "row winner";
-    winnerLine.textContent = `胜者：P${result.winner}`;
+    winnerLine.textContent =
+      result.winner === null || result.winner === undefined
+        ? t("tie_result")
+        : t("result_prefix", { winner: result.winner });
     scoreboard.appendChild(winnerLine);
   }
 
   const isHuman = !singlePlayer || state.current_player === 0;
   if (!isHuman) {
-    actionNode.innerHTML = "<div class='row muted'>AI 正在决策...</div>";
+    actionNode.innerHTML = `<div class='row muted'>${t("ai_thinking")}</div>`;
     setTimeout(() => {
       const choose = autoTakeAction(state) || aiAction(state);
       if (choose) {
         onAction(choose, true);
         return;
       }
-      actionNode.innerHTML = "<div class='row muted'>AI 无可执行动作，等待下一步。</div>";
+      actionNode.innerHTML = `<div class='row muted'>${t("ai_no_action")}</div>`;
     }, 600);
   }
 }
@@ -493,7 +757,7 @@ function render(state, singlePlayer) {
 function applyIfAllowed(action) {
   const result = applyAction(window.gameState, action);
   if (!result.accepted) {
-    window.alert(result.message || "动作不可执行");
+    window.alert(result.message || t("game_action_invalid"));
     return;
   }
   window.gameState = result.state;
@@ -504,9 +768,9 @@ function onAction(action, skipAlert) {
   const result = applyAction(window.gameState, action);
   if (!result.accepted) {
     if (!skipAlert) {
-      window.alert(result.message || "动作不可执行");
+      window.alert(result.message || t("game_action_invalid"));
     } else {
-      window.console.warn(result.message || "动作不可执行");
+      window.console.warn(result.message || t("game_action_invalid"));
     }
     return;
   }
@@ -521,7 +785,7 @@ function startGame() {
   const singlePlayer = document.getElementById("single-player").checked;
 
   if (players < 3 || players > 7) {
-    window.alert("支持 3-7 人玩家。");
+    window.alert(t("players_limit"));
     return;
   }
 
@@ -536,7 +800,22 @@ function setRandomSeed() {
 
 document.getElementById("new-game").addEventListener("click", startGame);
 document.getElementById("seed-random").addEventListener("click", setRandomSeed);
+const zhBtn = document.getElementById("lang-zh");
+const enBtn = document.getElementById("lang-en");
+if (zhBtn) {
+  zhBtn.addEventListener("click", () => setLocale("zh"));
+}
+if (enBtn) {
+  enBtn.addEventListener("click", () => setLocale("en"));
+}
 
 window.onload = () => {
+  const savedLocale = window.localStorage.getItem("startups-locale");
+  if (savedLocale) {
+    window.UI_LOCALE = savedLocale === "en" ? "en" : "zh";
+  } else if (window.UI_LOCALE !== "en") {
+    window.UI_LOCALE = "zh";
+  }
+  applyLocaleTexts();
   setRandomSeed();
 };

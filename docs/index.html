@@ -9,43 +9,49 @@
 <body>
   <main class="container">
     <header>
-      <h1>Startups 可视化对局（Web）</h1>
-      <p>本页面为静态版前端界面，支持多人手动/单人局（P0 人类，P1+ AI）。</p>
+      <div class="inline">
+        <button id="lang-zh" type="button" class="active">中文</button>
+        <button id="lang-en" type="button">English</button>
+      </div>
+      <h1 id="app-title">Startups 可视化对局（Web）</h1>
+      <p id="app-subtitle">本页面为静态版前端界面，支持多人手动/单人局（P0 人类，P1+ AI）。</p>
     </header>
 
     <section class="panel">
-      <h2>开局设置</h2>
+      <h2 id="setup-title">开局设置</h2>
       <label>
-        人数：
+        <span id="players-label">人数：</span>
         <input id="players" type="number" min="3" max="7" value="3" />
       </label>
       <label>
-        种子（可留空）：
+        <span id="seed-label">种子（可留空）：</span>
         <input id="seed" type="number" placeholder="例如 101" />
       </label>
       <label>
         <input id="single-player" type="checkbox" checked />
-        单人局（P0 人类，P1+ AI）
+        <span id="single-player-label">单人局（P0 人类，P1+ AI）</span>
       </label>
       <button id="new-game">开始新游戏</button>
       <button id="seed-random">随机种子</button>
     </section>
 
     <section id="game" class="panel" hidden>
-      <h2>当前局面</h2>
+      <h2 id="state-title">当前局面</h2>
       <div id="state-summary"></div>
-      <h3>市场</h3>
+      <h3 id="market-title">市场</h3>
       <div id="market"></div>
-      <h3>公司反垄断持有人</h3>
+      <h3 id="monopoly-title">公司反垄断持有人</h3>
       <div id="monopoly"></div>
-      <h3>当前玩家</h3>
+      <h3 id="players-overview-title">牌桌详情</h3>
+      <div id="players-overview"></div>
+      <h3 id="current-title">当前玩家</h3>
       <div id="current-player"></div>
-      <h3>可选动作</h3>
+      <h3 id="actions-title">可选动作</h3>
       <div id="actions"></div>
     </section>
 
     <section id="results" class="panel" hidden>
-      <h2>结算结果</h2>
+      <h2 id="result-title">结算结果</h2>
       <div id="scoreboard"></div>
     </section>
   </main>
