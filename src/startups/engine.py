@@ -76,14 +76,14 @@ def apply_action(
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_STATE,
-            message="游戏已结束，无法继续操作。",
+            message="engine_game_ended",
             accepted=False,
         )
     if player_id != state.current_player:
         return ActionResult(
             state=state,
             code=ErrorCode.NOT_YOUR_TURN,
-            message="不是你的回合。",
+            message="engine_not_your_turn",
             accepted=False,
         )
 
@@ -92,7 +92,7 @@ def apply_action(
             return ActionResult(
                 state=state,
                 code=ErrorCode.INVALID_PHASE,
-                message="当前不是抽牌阶段。",
+                message="engine_invalid_take_stage",
                 accepted=False,
             )
         if action.action_type == ActionType.TAKE_FROM_DECK:
@@ -107,7 +107,7 @@ def apply_action(
             return ActionResult(
                 state=state,
                 code=ErrorCode.INVALID_PHASE,
-                message="当前不是打牌阶段。",
+                message="engine_invalid_play_stage",
                 accepted=False,
             )
         if action.action_type == ActionType.PLAY_TO_PORTFOLIO:
@@ -117,7 +117,7 @@ def apply_action(
     return ActionResult(
         state=state,
         code=ErrorCode.INVALID_MOVE,
-        message="未知动作。",
+        message="engine_unknown_action",
         accepted=False,
     )
 
@@ -136,7 +136,7 @@ def _take_from_deck(state: GameState) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_STATE,
-            message="抽牌堆已空，无法从抽牌堆拿牌。",
+            message="engine_deck_empty",
             accepted=False,
         )
 
@@ -149,7 +149,7 @@ def _take_from_deck(state: GameState) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.NOT_ENOUGH_CAPITAL,
-            message=f"现金不足，需要 {payable} 枚。",
+            message="engine_need_cash",
             accepted=False,
         )
 
@@ -189,7 +189,7 @@ def _take_from_deck(state: GameState) -> ActionResult:
             events=events,
         ),
         code=ErrorCode.OK,
-        message="拿牌成功。",
+        message="engine_market_taken",
         accepted=True,
     )
 
@@ -199,14 +199,14 @@ def _take_from_market(state: GameState, index: int | None) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="需要提供市场卡位置。",
+            message="engine_require_market_index",
             accepted=False,
         )
     if not 0 <= index < len(state.market):
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="市场卡位置无效。",
+            message="engine_market_oob",
             accepted=False,
         )
 
@@ -215,7 +215,7 @@ def _take_from_market(state: GameState, index: int | None) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_MOVE,
-            message="当前你持有该公司反垄断筹码，不能从市场拿同公司卡。",
+            message="engine_anti_monopoly_restrict",
             accepted=False,
         )
 
@@ -257,7 +257,7 @@ def _take_from_market(state: GameState, index: int | None) -> ActionResult:
             events=events,
         ),
         code=ErrorCode.OK,
-        message="从市场拿牌成功。",
+        message="engine_take_success",
         accepted=True,
     )
 
@@ -267,7 +267,7 @@ def _play_to_portfolio(state: GameState, hand_index: int | None) -> ActionResult
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="需要提供手牌位置。",
+            message="engine_require_hand_index",
             accepted=False,
         )
     player = state.current_player_state()
@@ -275,14 +275,14 @@ def _play_to_portfolio(state: GameState, hand_index: int | None) -> ActionResult
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_STATE,
-            message="手牌为空。",
+            message="engine_hand_empty",
             accepted=False,
         )
     if not 0 <= hand_index < len(player.hand):
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="手牌位置无效。",
+            message="engine_hand_oob",
             accepted=False,
         )
 
@@ -315,7 +315,7 @@ def _play_to_portfolio(state: GameState, hand_index: int | None) -> ActionResult
     return ActionResult(
         state=new_state,
         code=ErrorCode.OK,
-        message="打出到个人区。",
+        message="engine_play_portfolio_success",
         accepted=True,
     )
 
@@ -325,7 +325,7 @@ def _play_to_market(state: GameState, hand_index: int | None) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="需要提供手牌位置。",
+            message="engine_require_hand_index",
             accepted=False,
         )
     player = state.current_player_state()
@@ -333,14 +333,14 @@ def _play_to_market(state: GameState, hand_index: int | None) -> ActionResult:
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_STATE,
-            message="手牌为空。",
+            message="engine_hand_empty",
             accepted=False,
         )
     if not 0 <= hand_index < len(player.hand):
         return ActionResult(
             state=state,
             code=ErrorCode.INVALID_INDEX,
-            message="手牌位置无效。",
+            message="engine_hand_oob",
             accepted=False,
         )
     if state.last_took_from_market and state.last_took_company is not None:
@@ -348,7 +348,7 @@ def _play_to_market(state: GameState, hand_index: int | None) -> ActionResult:
             return ActionResult(
                 state=state,
                 code=ErrorCode.INVALID_MOVE,
-                message="本轮第 1 步从市场拿到该公司后不能立即打回市场。",
+                message="engine_play_market_forbidden",
                 accepted=False,
             )
 
@@ -378,7 +378,7 @@ def _play_to_market(state: GameState, hand_index: int | None) -> ActionResult:
     return ActionResult(
         state=new_state,
         code=ErrorCode.OK,
-        message="打出到市场。",
+        message="engine_play_market_success",
         accepted=True,
     )
 

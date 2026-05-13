@@ -27,7 +27,7 @@ This file is a concise rule summary adapted for implementation and testing.
 
 ## 3) End and scoring (implementation interpretation)
 
-The exact source rules can be interpreted differently across references; this implementation uses:
+This implementation uses:
 
 - When a player draws the final deck card and then completes the two-step turn, the game goes directly to scoring.
 - Before scoring, all cards in the last player’s hand are revealed and merged into portfolio counts.

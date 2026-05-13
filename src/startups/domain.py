@@ -161,7 +161,7 @@ class GameState:
         return cls(
             rules=rules,
             players=players,
-            deck=tuple(int(x) for x in payload["deck"]),
+            deck=tuple[int, ...](int(x) for x in payload["deck"]),
             market=market,
             companies=companies,
             stage=TurnStage[payload["stage"]],

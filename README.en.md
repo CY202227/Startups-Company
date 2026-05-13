@@ -53,6 +53,7 @@ startups --players 3 --seed 101 --single-player
 ```
 
 - `--single-player`: P0 is human, P1+ are AI.
+- `--locale zh|en`: choose CLI language (default: `zh`).
 - AI randomly picks between `greedy` and `anti_pressure` each turn.
 - AI uses visible information only: it knows its own hand and public states.
 
@@ -81,6 +82,12 @@ python -m http.server 8080 --directory docs
 - GitHub Pages deployment:
   - Set Pages Source to `docs/`
   - Page URL: `https://<your-username>.github.io/<repo-name>/`
+
+## i18n
+
+- A single locale source drives both CLI and Web: `src/startups/locales/startups_i18n.json`.
+- Missing translations fall back to `zh`, and then to the key itself.
+- Web reads the shared source through `docs/i18n_loader.js`.
 
 ## CLI Commands
 
