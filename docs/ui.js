@@ -11,133 +11,17 @@ const STAGE_TAKE = "TAKE";
 const STAGE_PLAY = "PLAY";
 const STAGE_FINISHED = "FINISHED";
 
-const I18N = {
-  zh: {
-    title: "Startups 可视化对局（Web）",
-    subtitle: "本页面为静态版前端界面，支持多人手动/单人局（P0 人类，P1+ AI）。",
-    setup_title: "开局设置",
-    players_label: "人数：",
-    seed_label: "种子（可留空）：",
-    seed_placeholder: "例如 101",
-    single_player_label: "单人局（P0 人类，P1+ AI）",
-    new_game_btn: "开始新游戏",
-    random_seed_btn: "随机种子",
-    state_title: "当前局面",
-    market_title: "市场",
-    monopoly_title: "公司反垄断持有人",
-    players_overview_title: "牌桌详情",
-    overview_you: "（你）",
-    overview_cash: "现金",
-    overview_portfolio: "持股",
-    current_title: "当前玩家",
-    actions_title: "可选动作",
-    result_title: "结算结果",
-    // existing keys ...
-    game_ended: "游戏已结束",
-    not_take_stage: "当前不是 TAKE 阶段",
-    not_play_stage: "当前不是 PLAY 阶段",
-    deck_empty: "抽牌堆已空",
-    insufficient_cash: "现金不足，需 {cost} 金币",
-    index_market_oob: "市场索引越界",
-    anti_monopoly_forbid: "反垄断限制，不可拿该牌",
-    hand_index_oob: "手牌索引越界",
-    market_recent_forbid: "你刚从市场拿到该公司牌，不能直接打回市场。",
-    unknown_action: "未知动作",
-    ai_thinking: "AI 正在决策...",
-    ai_no_action: "AI 无可执行动作，等待下一步。",
-    game_action_invalid: "动作不可执行",
-    no_market_card: "（当前无市场牌）",
-    blocked_market_card: "不可取（反垄断）",
-    market_card: "可取",
-    holder_none: "无人",
-    you_suffix: "（你）",
-    hand_title: "手牌",
-    hand_line: "{idx}）{name}（总量：{total}）",
-    ai_hand_hidden: "当前为 AI 回合，手牌对你隐藏。",
-    cash: "现金：{value}",
-    portfolio: "持股：{value}",
-    tie_result: "平局",
-    draw_from_deck_btn: "从牌堆抽取（花费 {cost} 金币）",
-    take_market_btn: "拿市场 #{idx}（{name}，总量：{total}，+{coins}）",
-    to_portfolio_btn: "放入资本账户",
-    to_market_btn: "放入市场",
-    no_hand_skip: "无手牌，回合自动结束。",
-    result_prefix: "胜者：P{winner}",
-    score_line: "P{idx}：{total}（现金 {cash}，翻牌 {flipped}，罚金 {penalty}）",
-    turn_label: "回合：{value}",
-    stage_label: "阶段：{value}",
-    player_label: "当前玩家：P{value}",
-    deck_left_label: "抽牌堆剩余：{value}",
-    event_label: "最新事件：{value}",
-    players_limit: "支持 3-7 人玩家。",
-    stage_take: "拿牌",
-    stage_play: "出牌",
-    stage_finished: "结束",
-  },
-  en: {
-    title: "Startups Visual Match (Web)",
-    subtitle:
-      "This is a static frontend interface with multi-player manual mode or single-player (P0 is human, P1+ AI).",
-    setup_title: "Setup",
-    players_label: "Players:",
-    seed_label: "Seed (optional):",
-    seed_placeholder: "e.g., 101",
-    single_player_label: "Single player (P0 is human, P1+ AI)",
-    new_game_btn: "New Game",
-    random_seed_btn: "Random Seed",
-    state_title: "Current State",
-    market_title: "Market",
-    monopoly_title: "Anti-monopoly Holder",
-    players_overview_title: "Table Overview",
-    overview_you: "(You)",
-    overview_cash: "Cash",
-    overview_portfolio: "Portfolio",
-    current_title: "Current Player",
-    actions_title: "Available Actions",
-    result_title: "Final Scores",
-    // existing keys ...
-    game_ended: "Game over",
-    not_take_stage: "Current phase is not TAKE",
-    not_play_stage: "Current phase is not PLAY",
-    deck_empty: "Deck is empty",
-    insufficient_cash: "Not enough cash. Need {cost}.",
-    index_market_oob: "Market index out of range",
-    anti_monopoly_forbid: "Cannot take this card due to anti-monopoly restriction",
-    hand_index_oob: "Hand index out of range",
-    market_recent_forbid: "You cannot put this card back to market immediately.",
-    unknown_action: "Unknown action",
-    ai_thinking: "AI is deciding...",
-    ai_no_action: "AI has no valid action and is waiting.",
-    game_action_invalid: "Invalid action",
-    no_market_card: "(No cards in market)",
-    blocked_market_card: "Blocked (anti-monopoly)",
-    market_card: "Available",
-    holder_none: "No owner",
-    you_suffix: "(You)",
-    hand_title: "Hand",
-    hand_line: "{idx}) {name} (Total: {total})",
-    ai_hand_hidden: "Current player is AI. Their hand is hidden.",
-    cash: "Cash: {value}",
-    portfolio: "Portfolio: {value}",
-    tie_result: "Tie",
-    draw_from_deck_btn: "Draw from deck (cost {cost})",
-    take_market_btn: "Take market #{idx} ({name}, total: {total}, +{coins})",
-    to_portfolio_btn: "To portfolio",
-    to_market_btn: "To market",
-    no_hand_skip: "No cards in hand, turn auto-skips.",
-    result_prefix: "Winner: P{winner}",
-    score_line: "P{idx}: {total} (Cash {cash}, Flipped {flipped}, Penalty {penalty})",
-    turn_label: "Turn: {value}",
-    stage_label: "Phase: {value}",
-    player_label: "Current player: P{value}",
-    deck_left_label: "Deck left: {value}",
-    event_label: "Latest event: {value}",
-    players_limit: "Players must be between 3 and 7.",
-    stage_take: "Take",
-    stage_play: "Play",
-    stage_finished: "Finished",
-  },
-};
+function t(key, params) {
+  const locale = currentLocale();
+  const bundles = window.startupsI18nBundle || {};
+  const source = bundles[locale] || {};
+  const fallback = bundles.zh || {};
+  const template = source[key] || fallback[key] || key;
+  if (typeof template !== "string" || !params) {
+    return String(template);
+  }
+  return template.replace(/{(\w+)}/g, (_, name) => String(params[name] ?? ""));
+}
 
 function currentLocale() {
   if (window.UI_LOCALE === "en") return "en";
@@ -197,15 +81,6 @@ function applyLocaleTexts() {
   applyLocaleTextById("actions-title", "actions_title");
   applyLocaleTextById("result-title", "result_title");
   syncLocaleButtons();
-}
-
-function t(key, params) {
-  const locale = currentLocale();
-  const item = I18N[locale][key] || I18N.zh[key];
-  if (typeof item === "string" && params) {
-    return item.replace(/{(\w+)}/g, (_, name) => String(params[name] ?? ""));
-  }
-  return item || key;
 }
 
 function stageText(stage) {
@@ -590,11 +465,12 @@ function render(state, singlePlayer) {
       const companyTotal = COMPANIES[card.company_id].total;
       const node = document.createElement("div");
       node.className = `market-card ${blocked ? "blocked" : ""}`;
-      if (currentLocale() === "en") {
-        node.textContent = `#${idx} ${companyName(card.company_id)}, total: ${companyTotal}, coins: ${card.coins}, `;
-      } else {
-        node.textContent = `#${idx} ${companyName(card.company_id)}（总量：${companyTotal}），金币:${card.coins}，`;
-      }
+      node.textContent = t("market_row", {
+        idx,
+        name: companyName(card.company_id),
+        total: companyTotal,
+        coins: card.coins,
+      });
       const flag = document.createElement("span");
       flag.textContent = blocked ? t("blocked_market_card") : t("market_card");
       flag.className = blocked ? "muted" : "winner";
@@ -825,7 +701,13 @@ if (enBtn) {
   enBtn.addEventListener("click", () => setLocale("en"));
 }
 
-window.onload = () => {
+window.onload = async () => {
+  try {
+    await window.loadStartupsI18nBundle();
+  } catch (error) {
+    window.startupsI18nBundle = {};
+    window.console.warn(error);
+  }
   const savedLocale = window.localStorage.getItem("startups-locale");
   if (savedLocale) {
     window.UI_LOCALE = savedLocale === "en" ? "en" : "zh";

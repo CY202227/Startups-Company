@@ -51,6 +51,7 @@ startups --players 3 --seed 101 --single-player
 ```
 
 - `--single-player`：P0 为真人，其余玩家由 AI 控制
+- `--locale zh|en`：CLI 输出语言（默认中文 `zh`）
 - AI 每一步会在 `greedy` 与 `anti_pressure` 两个策略里随机选择一种
 - AI 决策是基于“可见信息”进行：它只看到自己的手牌，不直接看到他人手牌
 
@@ -79,6 +80,12 @@ python -m http.server 8080 --directory docs
 - GitHub Pages 发布建议：
   - 将仓库 Pages Source 设为 `docs/` 目录
   - 页面地址会变为仓库 `https://<你的用户名>.github.io/<仓库名>/`
+
+## 多语言
+
+- CLI 与 Web 共用同一份翻译源：`src/startups/locales/startups_i18n.json`。
+- 文案命名与 key 完全统一，缺省时回退到 `zh`，再回退到 key 本身。
+- Web 通过 `docs/i18n_loader.js` 加载同一份 JSON。
 
 ## 命令说明（CLI）
 

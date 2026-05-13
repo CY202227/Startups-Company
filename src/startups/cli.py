@@ -13,6 +13,7 @@ from .actions import parse_action
 from .domain import Action
 from .domain import GameState
 from .engine import apply_action, setup_game
+from .i18n.catalog import DEFAULT_LOCALE, SUPPORTED_LOCALES, normalize_locale, translate
 from .rules import ActionType, DEFAULT_COMPANIES, TurnStage
 from .scoring import ScoreSnapshot, compute_scores
 
@@ -24,11 +25,18 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--load", type=Path)
     parser.add_argument(
+        "--locale",
+        default=DEFAULT_LOCALE,
+        choices=tuple(sorted(SUPPORTED_LOCALES)),
+        help="语言: zh 或 en",
+    )
+    parser.add_argument(
         "--single-player",
         action="store_true",
         help="启用单人局：当前玩家(P0)为真人，其余为 AI。",
     )
     args = parser.parse_args()
+    locale = normalize_locale(args.locale)
 
     rng = random.Random(args.seed)
     if args.load is not None:
@@ -38,48 +46,54 @@ def main() -> None:
     else:
         state = setup_game(args.players, args.seed)
 
-    print("游戏已开始：输入 help 查看可用命令。")
-    _run_loop(state, args.single_player, rng)
+    print(translate(locale, "cli_started"))
+    _run_loop(state, args.single_player, rng, locale)
 
 
 def _run_loop(
     state: GameState,
     single_player: bool,
     rng: random.Random,
+    locale: str,
 ) -> None:
     human_player = 0 if single_player else None
     while not state.is_finished():
-        _print_state(state)
+        _print_state(state, locale)
         if single_player and state.current_player != human_player:
             try:
                 action = _choose_ai_action(state, rng)
                 print(
-                    f"[AI-P{state.current_player}] 决策: {action.action_type.name}",
+                    translate(
+                        locale,
+                        "cli_ai_decision",
+                        player=state.current_player,
+                        action=action.action_type.name,
+                    )
                 )
             except RuntimeError as error:
-                print(f"[AI] 决策失败，使用兜底策略：{error}")
+                print(translate(locale, "cli_ai_fallback", error=error))
                 action = _fallback_ai_action(state)
                 if action is None:
-                    raise SystemExit("AI 无法进行可行动作，游戏终止。") from error
+                    raise SystemExit(translate(locale, "cli_ai_no_action")) from error
         else:
             if state.stage == TurnStage.TAKE:
                 action = _auto_take_action(state)
                 if action is not None:
-                    print("[AUTO] 仅能抽牌，已自动执行 d")
+                    print(translate(locale, "cli_auto_take"))
                 else:
-                    action = _read_action(state)
+                    action = _read_action(state, locale)
             else:
-                action = _read_action(state)
+                action = _read_action(state, locale)
             if action is None:
                 continue
         result = apply_action(state, state.current_player, action)
         if not result.accepted:
-            print(f"非法动作：{result.message}")
+            print(_translate_result(locale, result.message))
             continue
         state = result.state
 
     _, score = compute_scores(state)
-    _print_scores(state, score)
+    _print_scores(state, score, locale)
 
 
 def _choose_ai_action(state: GameState, rng: random.Random) -> Action:
@@ -129,20 +143,20 @@ def _fallback_ai_action(state: GameState) -> Optional[Action]:
     return None
 
 
-def _read_action(state: GameState) -> Optional[Action]:
-    prompt = _prompt(state)
+def _read_action(state: GameState, locale: str) -> Optional[Action]:
+    prompt = _prompt(state, locale)
     raw = input(prompt).strip()
     if raw.lower() in {"q", "quit", "exit"}:
         raise SystemExit
     if raw.lower() in {"h", "help"}:
-        _print_help()
+        _print_help(locale)
         return None
     if raw.lower().startswith("state"):
-        _print_state(state)
+        _print_state(state, locale)
         return None
     action = parse_action(raw)
     if action is None:
-        print("无法识别命令。输入 help 查看。")
+        print(translate(locale, "cli_unrecognized_command"))
         return None
     if state.stage == TurnStage.TAKE:
         if action.action_type in {
@@ -150,7 +164,7 @@ def _read_action(state: GameState) -> Optional[Action]:
             ActionType.TAKE_FROM_MARKET,
         }:
             return action
-        print("当前阶段只能执行拿牌动作。")
+        print(translate(locale, "cli_take_only"))
         return None
     if state.stage == TurnStage.PLAY:
         if action.action_type in {
@@ -158,7 +172,7 @@ def _read_action(state: GameState) -> Optional[Action]:
             ActionType.PLAY_TO_MARKET,
         }:
             return action
-        print("当前阶段只能执行打牌动作。")
+        print(translate(locale, "cli_play_only"))
         return None
     return None
 
@@ -188,35 +202,35 @@ def _market_take_cost(state: GameState) -> int:
     return cost
 
 
-def _print_help() -> None:
-    print("命令说明：")
-    print(" d / draw             从牌堆拿牌")
-    print(" m <idx>              从市场拿牌，例如 m 0")
-    print(" p <idx>              打到个人区域，例如 p 1")
-    print(" s <idx>              打到市场，例如 s 1")
-    print(" state                打印当前状态")
-    print(" q                    退出")
+def _print_help(locale: str) -> None:
+    print(translate(locale, "command_help_title"))
+    print(translate(locale, "command_help_draw"))
+    print(translate(locale, "command_help_market"))
+    print(translate(locale, "command_help_portfolio"))
+    print(translate(locale, "command_help_to_market"))
+    print(translate(locale, "command_help_state"))
+    print(translate(locale, "command_help_quit"))
 
 
-def _prompt(state: GameState) -> str:
+def _prompt(state: GameState, locale: str) -> str:
     player = state.current_player
     if state.stage == TurnStage.TAKE:
-        return f"[P{player}] TAKE > "
+        return translate(locale, "cli_prompt_take", player=player)
     if state.stage == TurnStage.PLAY:
-        return f"[P{player}] PLAY > "
-    return "[END] "
+        return translate(locale, "cli_prompt_play", player=player)
+    return translate(locale, "cli_prompt_end")
 
 
 def _company_name(company_id: int) -> str:
     return DEFAULT_COMPANIES[company_id].name
 
 
-def _print_state(state: GameState) -> None:
+def _print_state(state: GameState, locale: str) -> None:
     print("-" * 80)
-    print(f"回合: {state.turn_number}")
-    print(f"阶段: {state.stage.name}")
-    print(f"当前玩家: P{state.current_player}")
-    print(f"抽牌堆剩余: {len(state.deck)}")
+    print(translate(locale, "cli_turn", value=state.turn_number))
+    print(translate(locale, "cli_stage", value=_stage_text(locale, state.stage.name)))
+    print(translate(locale, "cli_current_player", value=state.current_player))
+    print(translate(locale, "cli_deck_left", value=len(state.deck)))
     current = state.players[state.current_player]
     token_names = [
         _company_name(cfg.company_id)
@@ -224,57 +238,117 @@ def _print_state(state: GameState) -> None:
         if cfg.anti_monopoly_owner == state.current_player
     ]
     if token_names:
-        print(f"现金: {current.cash} | 持有反垄断: {', '.join(token_names)}")
+        print(
+            translate(
+                locale,
+                "cli_cash_anti",
+                cash=current.cash,
+                holders=", ".join(token_names),
+            )
+        )
     else:
-        print(f"现金: {current.cash} | 持有反垄断: 无")
-    print("手牌:")
+        print(translate(locale, "cli_no_anti", cash=current.cash))
+    print(translate(locale, "cli_hand_title"))
     for idx, card in enumerate(current.hand):
         total_all = DEFAULT_COMPANIES[card].card_count
-        print(f"  {idx}: {_company_name(card)} " f"[总量:{total_all}]")
-    print("市场:")
+        print(
+            translate(
+                locale,
+                "cli_hand_item",
+                idx=idx,
+                name=_company_name(card),
+                total=total_all,
+            )
+        )
+    print(translate(locale, "cli_market_title"))
     if not state.market:
-        print("  空")
+        print(translate(locale, "cli_market_empty"))
     else:
         for idx, card in enumerate(state.market):
             print(
-                f"  {idx}: {_company_name(card.company_id)} " f"(coins:{card.coins})",
+                translate(
+                    locale,
+                    "cli_market_item",
+                    idx=idx,
+                    name=_company_name(card.company_id),
+                    total=DEFAULT_COMPANIES[card.company_id].card_count,
+                    coins=card.coins,
+                )
             )
-    print("反垄断持有人:")
+    print(translate(locale, "cli_token_title"))
     for cfg in state.companies:
         owner = state.companies[cfg.company_id].anti_monopoly_owner
         if owner is None:
             continue
-        print(f"  {_company_name(cfg.company_id)} -> P{owner}")
-    print("可行动作：", end=" ")
+        print(translate(locale, "cli_token_row", name=_company_name(cfg.company_id), value=owner))
+    print(translate(locale, "cli_actions_title"), end=" ")
     if state.stage == TurnStage.TAKE:
-        options = "d"
+        options = translate(locale, "cli_actions_take")
         if state.market:
-            options += ", m <idx>"
+            options = translate(locale, "cli_actions_take_market")
         print(options)
     elif state.stage == TurnStage.PLAY:
-        print("p <idx> 或 s <idx>")
-    print("输入 help 可查看详细命令。")
+        print(translate(locale, "cli_actions_play"))
+    print(translate(locale, "cli_help_tip"))
 
 
-def _print_scores(state: GameState, score: ScoreSnapshot) -> None:
+def _print_scores(state: GameState, score: ScoreSnapshot, locale: str) -> None:
     print("=" * 80)
-    print("结算完成")
+    print(translate(locale, "cli_score_title"))
     for pid, player in enumerate(state.players):
         print(
-            f"P{pid}: cash={player.cash}, "
-            f"flipped={player.flipped_coins}, "
-            f"penalty={player.penalty}, score={score.scores[pid]}",
+            translate(
+                locale,
+                "cli_score_row",
+                idx=pid,
+                cash=player.cash,
+                flipped=player.flipped_coins,
+                penalty=player.penalty,
+                score=score.scores[pid],
+            )
         )
     if score.winner is None:
-        print("平局")
+        print(translate(locale, "cli_tie"))
     else:
-        print(f"冠军：P{score.winner}")
-    print("支付明细:")
+        print(translate(locale, "cli_champion", winner=score.winner))
+    print(translate(locale, "cli_payment_title"))
     for item in score.payouts:
         print(
-            f"  P{item.payer_id} -> P{item.holder_id}: "
-            f"{item.paid}/{item.required} for 公司 {_company_name(item.company_id)}",
+            translate(
+                locale,
+                "cli_payment_row",
+                payer=item.payer_id,
+                holder=item.holder_id,
+                paid=item.paid,
+                required=item.required,
+                name=_company_name(item.company_id),
+            )
         )
+
+
+def _translate_result(locale: str, raw_message: str) -> str:
+    if raw_message.startswith("engine_"):
+        if "|" in raw_message:
+            key, raw_params = raw_message.split("|", 1)
+            parts = raw_params.split(",") if raw_params else []
+            params = {}
+            for part in parts:
+                if "=" in part:
+                    name, value = part.split("=", 1)
+                    params[name] = value
+            return translate(locale, key, **params)
+        return translate(locale, raw_message)
+    return raw_message
+
+
+def _stage_text(locale: str, stage: str) -> str:
+    if stage == TurnStage.TAKE.name:
+        return translate(locale, "stage_take")
+    if stage == TurnStage.PLAY.name:
+        return translate(locale, "stage_play")
+    if stage == TurnStage.FINISHED.name:
+        return translate(locale, "stage_finished")
+    return stage
 
 
 if __name__ == "__main__":

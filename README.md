@@ -53,6 +53,7 @@ startups --players 3 --seed 101 --single-player
 ```
 
 - `--single-player`: P0 is human, P1+ are AI.
+- `--locale zh|en`: choose CLI language (default: `zh`).
 - AI randomly picks between `greedy` and `anti_pressure` each turn.
 - AI uses visible information only: it knows its own hand and public states.
 
@@ -81,6 +82,12 @@ python -m http.server 8080 --directory docs
 - GitHub Pages deployment:
   - Set Pages Source to `docs/`
   - Page URL: `https://<your-username>.github.io/<repo-name>/`
+
+## i18n
+
+- CLI and Web use one shared locale source: `src/startups/locales/startups_i18n.json`.
+- Both layers read the same key set and fallback rules: fallback to `zh`, then fallback to key name.
+- Web uses `docs/i18n_loader.js` to fetch the same source as JSON.
 
 ## CLI Commands
 
@@ -180,6 +187,7 @@ startups --players 3 --seed 101 --single-player
 ```
 
 - `--single-player`: P0 is human, P1+ are AI.
+- `--locale zh|en`: choose CLI language (default: `zh`).
 - AI randomly picks between `greedy` and `anti_pressure` each turn.
 - AI uses visible information only: it knows its own hand and public states.
 
@@ -206,6 +214,12 @@ python -m http.server 8080 --directory docs
 - GitHub Pages 发布建议：
   - 将仓库 Pages Source 设为 `docs/` 目录
   - 页面地址会变为仓库 `https://<你的用户名>.github.io/<仓库名>/`
+
+## i18n
+
+- CLI and Web use one shared locale source: `src/startups/locales/startups_i18n.json`.
+- Missing locale keys fall back to `zh`, then to the key string.
+- Web reads the shared source via `docs/i18n_loader.js`.
 
 ## CLI Commands
 
