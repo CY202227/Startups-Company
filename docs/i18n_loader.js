@@ -1,7 +1,17 @@
-const I18N_PATHS = [
-  "./startups_i18n.json",
-  "../src/startups/locales/startups_i18n.json",
-];
+const I18N_PATHS = (() => {
+  const scriptUrl = document.currentScript
+    ? new URL(document.currentScript.src)
+    : new URL(window.location.href);
+  const scriptDir = new URL("./", scriptUrl);
+  const pageDir = new URL("./", window.location.href);
+  const candidates = [
+    new URL("startups_i18n.json", scriptDir).href,
+    new URL("startups_i18n.json", pageDir).href,
+    new URL("../src/startups/locales/startups_i18n.json", scriptDir).href,
+    new URL("../src/startups/locales/startups_i18n.json", pageDir).href,
+  ];
+  return candidates.filter((value, index, all) => all.indexOf(value) === index);
+})();
 
 async function loadStartupsI18nBundle() {
   if (window.startupsI18nBundle) return window.startupsI18nBundle;
@@ -16,6 +26,7 @@ async function loadStartupsI18nBundle() {
         return data;
       } catch (error) {
         // Continue trying alternative paths.
+        continue;
       }
     }
     throw new Error("Failed to load startups_i18n.json.");
