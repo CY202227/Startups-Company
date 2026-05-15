@@ -73,6 +73,7 @@ function applyLocaleTexts() {
   applyLocaleTextById("single-player-label", "single_player_label");
   applyLocaleTextById("new-game", "new_game_btn");
   applyLocaleTextById("seed-random", "random_seed_btn");
+  applyLocaleTextById("rules-link", "rules_link");
   applyLocaleTextById("state-title", "state_title");
   applyLocaleTextById("market-title", "market_title");
   applyLocaleTextById("monopoly-title", "monopoly_title");
@@ -623,6 +624,10 @@ function render(state, singlePlayer) {
       });
       scoreboard.appendChild(row);
     });
+    const helpLine = document.createElement("div");
+    helpLine.className = "row muted";
+    helpLine.textContent = t("score_help");
+    scoreboard.appendChild(helpLine);
     const winnerLine = document.createElement("div");
     winnerLine.className = "row winner";
     winnerLine.textContent =
